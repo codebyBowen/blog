@@ -7,7 +7,7 @@ import { supabase } from "../utils/supabase";
 import avatar from "../public/avatar/user_default_1.jpeg"
 
 export default function TopBar() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<object[] | null>(null);
   const [showMenu, setShowMenu] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 

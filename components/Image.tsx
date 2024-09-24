@@ -1,6 +1,5 @@
 "use client"
 import { useState, useEffect } from 'react'
-import { supabase } from '../utils/supabase'
 
 export default function ArticleImage({ path, user} : {path: string, user: any}) {
   const [imageUrl, setImageUrl] = useState<string | null>(null)
