@@ -4,12 +4,19 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { supabase } from "../utils/supabase";
-import avatar from "../public/avatar/user_default_1.jpeg"
+import avatar from "../public/avatar/user_default_1.jpeg";
+
+interface User {
+  id: string;
+  username: string;
+  profile?: {
+    profile_image_url?: string;
+  };
+}
 
 export default function TopBar() {
-  const [user, setUser] = useState<object[] | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [showMenu, setShowMenu] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -22,7 +29,7 @@ export default function TopBar() {
         //   .select("*")
         //   .eq("id", user.id)
         //   .single();
-        setUser({ ...user });
+        setUser({ id: user.id, username: user.user_metadata.username || 'User' });
 
         // Set avatar URL
         // if (profile?.profile_image_url) {
@@ -42,6 +49,7 @@ export default function TopBar() {
     await supabase.auth.signOut();
     setUser(null);
   };
+
   console.log("user", user);
 
   if (!user) return null;
@@ -61,7 +69,7 @@ export default function TopBar() {
             className="flex items-center space-x-2 focus:outline-none"
           >
             <Image
-              src={user?.profile?.profile_image_url || avatar}
+              src={user.profile?.profile_image_url || avatar}
               alt="User Avatar"
               width={40}
               height={40}

@@ -18,7 +18,11 @@ export default function LoginPage() {
       if (error) throw error
       router.push('/')
     } catch (error) {
-      setError(error.message)
+      if (error instanceof Error) {
+        setError(error.message)
+      } else {
+        setError('An unknown error occurred')
+      }
     }
   }
 
@@ -84,7 +88,7 @@ export default function LoginPage() {
         </form>
         <div className="text-center">
           <Link href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
-            Don't have an account? Sign up
+            Do not have an account? Sign up
           </Link>
         </div>
       </div>

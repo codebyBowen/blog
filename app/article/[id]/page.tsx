@@ -1,4 +1,3 @@
-import { supabase } from "../../../utils/supabase";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { Article } from "../../../types/article";
@@ -9,7 +8,10 @@ import TopBar from "@/components/TopBar";
 
 const ReactMarkdown = dynamic(() => import("react-markdown"), { ssr: false });
 
-const remarkGfm = dynamic(() => import("remark-gfm"), { ssr: false });
+const remarkGfm = dynamic(
+  () => import("remark-gfm").then((mod) => mod.default),
+  { ssr: false }
+);
 
 export const revalidate = 0; // disable cache for this page
 
@@ -23,7 +25,6 @@ async function getArticle(id: string): Promise<Article | null> {
     .eq("id", id)
     .single();
 
-  console.log("data2", data);
   if (error) {
     console.error("Error fetching article:", error);
     return null;
@@ -45,6 +46,7 @@ async function getUser() {
   console.log("session", session);
   return session?.user ?? null;
 }
+
 
 export default async function ArticlePage({
   params,
@@ -70,7 +72,7 @@ export default async function ArticlePage({
       <div className="container mx-auto p-4">
         <h1 className="text-3xl font-bold mb-4">{article.title}</h1>
         <div className="prose prose-lg dark:prose-invert max-w-none mb-4">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          <ReactMarkdown remarkPlugins={[remarkGfm as any]}>
             {article.content}
           </ReactMarkdown>
         </div>
@@ -97,3 +99,5 @@ export default async function ArticlePage({
     </>
   );
 }
+
+

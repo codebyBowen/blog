@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, FormEvent, useEffect, ChangeEvent } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { supabase } from "../../utils/supabase";
 import { useRouter } from "next/navigation";
-import TopBar from "../../components/TopBar";
 import dynamic from 'next/dynamic';
 import 'react-markdown-editor-lite/lib/index.css';
 import MarkdownIt from 'markdown-it';
@@ -63,7 +62,7 @@ export default function CreateArticle() {
         audioPath = data.path;
       }
 
-      const { data, error } = await supabase.from("articles").insert({
+      const { error } = await supabase.from("articles").insert({
         title,
         content,
         markdown_content: markdownContent,

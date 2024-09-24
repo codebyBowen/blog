@@ -1,5 +1,10 @@
 "use client"
 import { useState, useEffect } from 'react'
+interface User {
+  session: {
+    access_token: string;
+  }
+}
 
 export default function ArticleImage({ path, user} : {path: string, user: any}) {
   const [imageUrl, setImageUrl] = useState<string | null>(null)

@@ -16,7 +16,7 @@ export default function EditProfile() {
     const fetchProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', user.id)
