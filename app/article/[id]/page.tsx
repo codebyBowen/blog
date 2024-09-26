@@ -6,7 +6,7 @@ import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import TopBar from "@/components/TopBar";
 
 // Moved to a separate client component
-import ArticleContent from "./ArticleContent.tsx";
+import ArticleContent from "./ArticleContent";
 
 export const revalidate = 0; // disable cache for this page
 
