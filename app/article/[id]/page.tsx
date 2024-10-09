@@ -4,7 +4,7 @@ import { Article } from "../../../types/article";
 import Image from "@/components/Image";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import TopBar from "@/components/TopBar";
-import BackToMenuButton from "@/components/backToMenuButton";
+import BackToMenuButton from "@/components/BackToMenuButton";
 import ArticleContent from "./ArticleContent";
 
 export const revalidate = 0; // disable cache for this page

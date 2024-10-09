@@ -8,8 +8,10 @@ import avatar from "../public/avatar/user_default_1.jpeg";
 import logo from "../public/logo.png";
 import NewsletterPopup from '@/components/NewsletterPopup';
 
+type User = { id: string; username: string } | null;
+
 export default function TopBar() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showSolutionsMenu, setShowSolutionsMenu] = useState(false);
   const [showPlatformMenu, setShowPlatformMenu] = useState(false);
@@ -128,7 +130,7 @@ export default function TopBar() {
                   className="user-button"
                 >
                   <Image
-                    src={user.profile?.profile_image_url || avatar}
+                    src={ avatar}
                     alt="User Avatar"
                     width={40}
                     height={40}
