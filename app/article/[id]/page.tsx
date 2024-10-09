@@ -47,9 +47,13 @@ export default async function ArticlePage({
     <>
       <TopBar />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
-        <h1 className="text-3xl font-bold mb-4">{article.title}</h1>
+        <h1 className="font-sans text-[#242424] font-bold text-3xl md:text-[42px] leading-tight md:leading-[52px] tracking-normal md:tracking-[-0.011em] mb-4 md:mb-8 mt-0 md:mt-[1.19em] break-words overflow-wrap-break-word">
+          <strong>{article.title}</strong>
+        </h1>
         <ArticleContent article={article} user={user} />
-        <div className="flex justify-end mt-4 mb-10"> {/* Changed this line */}
+        <div className="flex justify-end mt-4 mb-10">
+          {" "}
+          {/* Changed this line */}
           <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/8">
             <BackToMenuButton />
           </div>
