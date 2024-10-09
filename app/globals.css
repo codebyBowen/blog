@@ -27,3 +27,177 @@ body {
     text-wrap: balance;
   }
 }
+
+.navbar {
+  background-color: transparent;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 内部容器 */
+.navbar-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* Logo 部分 */
+.navbar-logo img {
+  height: 50px;
+}
+
+/* 菜单部分 */
+.navbar-menu {
+  display: flex;
+  list-style: none;
+  margin-left: 2rem;
+  flex: 1;
+  align-items: center; /* 添加这行 */
+}
+
+.navbar-item {
+  position: relative;
+  margin-right: 1.5rem;
+  display: flex; /* 添加这行 */
+  align-items: center; /* 添加这行 */
+}
+
+.navbar-link {
+  text-decoration: none;
+  color: #111;
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 0.5rem;
+  background: none; /* 添加这行 */
+  border: none; /* 添加这行 */
+  cursor: pointer; /* 添加这行 */
+}
+
+.navbar-link:hover {
+  color: #ffde2f;
+}
+
+/* 下拉菜单 */
+.dropdown-menu {
+  display: block;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  padding: 1rem;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+  z-index: 1000;
+}
+
+.dropdown-menu li {
+  margin-bottom: 0.5rem;
+}
+
+.dropdown-link {
+  display: block;
+  color: #111;
+  text-decoration: none;
+  padding: 0.5rem 0;
+}
+
+.dropdown-link:hover {
+  color: #ffde2f;
+}
+
+/* 按钮部分 */
+.navbar-buttons {
+  display: flex;
+  align-items: center;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 4px;
+  margin-left: 1rem;
+}
+
+.btn-primary {
+  background-color: #ffde2f; /* 黄色背景 */
+  color: #111;
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: #111;
+  border: 2px solid #111;
+}
+
+/* 用户菜单 */
+.user-menu {
+  position: relative;
+}
+
+.user-button {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+.user-avatar {
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  margin-right: 0.5rem;
+}
+
+.user-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 0.5rem 0;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  min-width: 150px;
+}
+
+.user-dropdown .dropdown-item {
+  display: block;
+  padding: 0.5rem 1rem;
+  color: #111;
+  text-decoration: none;
+}
+
+.user-dropdown .dropdown-item:hover {
+  background-color: #f0f0f0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .navbar-menu {
+    display: none;
+  }
+
+  .navbar {
+    justify-content: space-between;
+  }
+
+  /* 可添加移动端菜单按钮 */
+}
+
+/* 添加这个新的样式 */
+.navbar-item.dropdown .navbar-link {
+  display: flex;
+  align-items: center;
+}
+
+.lottie-svg-class{
+  width:calc(max(500px, 40vw))!important;
+}
+
+.navbar-link, .dropdown-link {
+  padding: 0.25rem 0.5rem; /* 减小导航链接的内边距 */
+  font-size: 0.875rem; /* 减小字体大小 */
+}

@@ -4,8 +4,7 @@ import { Article } from "../../../types/article";
 import Image from "@/components/Image";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import TopBar from "@/components/TopBar";
-
-// Moved to a separate client component
+import BackToMenuButton from "@/components/backToMenuButton";
 import ArticleContent from "./ArticleContent";
 
 export const revalidate = 0; // disable cache for this page
@@ -47,12 +46,14 @@ export default async function ArticlePage({
   return (
     <>
       <TopBar />
-      <div className="container mx-auto p-4">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
         <h1 className="text-3xl font-bold mb-4">{article.title}</h1>
         <ArticleContent article={article} user={user} />
-        <Link href="/" className="text-blue-500 hover:underline">
-          Back to Home
-        </Link>
+        <div className="flex justify-end mt-4 mb-10"> {/* Changed this line */}
+          <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/8">
+            <BackToMenuButton />
+          </div>
+        </div>
       </div>
     </>
   );

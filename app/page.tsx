@@ -2,6 +2,9 @@ import Link from "next/link";
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import TopBar from "@/components/TopBar";
+import LearnMoreBtn from "@/components/LearnMoreBtn";
+import CreateBtn from "@/components/CreateButton";
+
 
 export const revalidate = 0;
 
@@ -23,17 +26,17 @@ export default async function HomePage() {
       {" "}
       <TopBar />
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold mb-8 text-center dark:text-white">
+        {/* <h1 className="text-4xl font-bold mb-8 text-center dark:text-white">
           文章列表
-        </h1>
-        <div className="mb-8 text-center">
+        </h1> */}
+        {/* <div className="mb-8 text-center">
           <Link
             href="/create"
             className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110 dark:bg-blue-700 dark:hover:bg-blue-800"
           >
             创建新文章
           </Link>
-        </div>
+        </div> */}
         <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-6">
           {articles.map((article) => (
             <div
@@ -50,9 +53,10 @@ export default async function HomePage() {
                 <div className="flex justify-between items-center">
                   <Link
                     href={`/article/${article.id}`}
-                    className="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+                    className="hover:text-grey-300 dark:text-blue-400 dark:hover:text-grey-300 font-medium"
                   >
-                    阅读更多
+                    {/* <LearnMoreBtn /> */}
+                    {" Learn More >"}
                   </Link>
                   <div className="flex items-center space-x-4">
                     <span className="flex items-center text-gray-500 dark:text-gray-400">
@@ -89,6 +93,7 @@ export default async function HomePage() {
           ))}
         </div>
       </div>
+      <CreateBtn />
     </>
   );
 }

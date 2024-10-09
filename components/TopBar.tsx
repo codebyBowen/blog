@@ -5,18 +5,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { supabase } from "../utils/supabase";
 import avatar from "../public/avatar/user_default_1.jpeg";
-
-interface User {
-  id: string;
-  username: string;
-  profile?: {
-    profile_image_url?: string;
-  };
-}
+import logo from "../public/logo.png";
+import NewsletterPopup from '@/components/NewsletterPopup';
 
 export default function TopBar() {
-  const [user, setUser] = useState<User | null>(null);
-  const [showMenu, setShowMenu] = useState(false);
+  const [user, setUser] = useState(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showSolutionsMenu, setShowSolutionsMenu] = useState(false);
+  const [showPlatformMenu, setShowPlatformMenu] = useState(false);
+  const [showResourcesMenu, setShowResourcesMenu] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -24,22 +22,10 @@ export default function TopBar() {
         data: { user },
       } = await supabase.auth.getUser();
       if (user) {
-        // const { data: profile } = await supabase
-        //   .from("profiles")
-        //   .select("*")
-        //   .eq("id", user.id)
-        //   .single();
-        setUser({ id: user.id, username: user.user_metadata.username || 'User' });
-
-        // Set avatar URL
-        // if (profile?.profile_image_url) {
-        //   const { data } = supabase.storage
-        //     .from("user_profile_image")
-        //     .getPublicUrl("user_default_1.jpeg");
-        //   setAvatarUrl(data.publicUrl);
-        // } else {
-        //   setAvatarUrl(profile?.profile_image_url);
-        // }
+        setUser({
+          id: user.id,
+          username: user.user_metadata.username || "User",
+        });
       }
     };
     fetchUser();
@@ -50,53 +36,144 @@ export default function TopBar() {
     setUser(null);
   };
 
-  console.log("user", user);
-
-  if (!user) return null;
-
   return (
-    <div className="bg-white dark:bg-gray-800 shadow-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex justify-between items-center">
-        <Link
-          href="/"
-          className="text-xl font-bold text-gray-800 dark:text-white"
-        >
-          My Blog
-        </Link>
-        <div className="relative">
-          <button
-            onClick={() => setShowMenu(!showMenu)}
-            className="flex items-center space-x-2 focus:outline-none"
-          >
-            <Image
-              src={user.profile?.profile_image_url || avatar}
-              alt="User Avatar"
-              width={40}
-              height={40}
-              className="rounded-full border-2 border-gray-200 dark:border-gray-700"
+    <>
+      <nav className="navbar">
+        <div className="navbar-container">
+          {/* Logo */}
+          <Link href="/" className="navbar-logo">
+            <Image 
+              src={logo} 
+              alt="EQL Logo" 
+              width={100} 
+              // height={100} 
+              style={{
+                width: 'auto',
+                // height: 'auto',
+              }}
             />
-            <span className="text-gray-700 dark:text-gray-300">
-              {user.username}
-            </span>
-          </button>
-          {showMenu && (
-            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md overflow-hidden shadow-xl z-10">
-              <Link
-                href="/profile"
-                className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
-              >
-                Edit Profile
+          </Link>
+
+          {/* Navigation Menu */}
+          <ul className="navbar-menu">
+            {/* Platform Dropdown */}
+            <li
+              className="navbar-item dropdown"
+              onMouseEnter={() => setShowPlatformMenu(true)}
+              onMouseLeave={() => setShowPlatformMenu(false)}
+            >
+              <button className="navbar-link">Platform</button>
+              {showPlatformMenu && (
+                <ul className="dropdown-menu">
+                  <li>
+                    <Link href="/overview" className="dropdown-link">
+                      Overview
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/runfair" className="dropdown-link">
+                      What is Run Fair?
+                    </Link>
+                  </li>
+                  {/* 添加更多菜单项 */}
+                </ul>
+              )}
+            </li>
+
+            {/* Resources Dropdown */}
+            <li
+              className="navbar-item dropdown"
+              onMouseEnter={() => setShowResourcesMenu(true)}
+              onMouseLeave={() => setShowResourcesMenu(false)}
+            >
+              <button className="navbar-link">Resources</button>
+              {showResourcesMenu && (
+                <ul className="dropdown-menu">
+                  <li>
+                    <Link href="/news" className="dropdown-link">
+                      Blog
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/newsletter" className="dropdown-link">
+                      Newsletter
+                    </Link>
+                  </li>
+                  {/* 添加更多菜单项 */}
+                </ul>
+              )}
+            </li>
+
+            <li className="navbar-item">
+              <Link href="/pricing" className="navbar-link">
+                Pricing
               </Link>
-              <button
-                onClick={handleSignOut}
-                className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+            </li>
+            <li className="navbar-item">
+              <button 
+                onClick={() => setShowPopup(true)} 
+                className="navbar-link"
               >
-                Sign Out
+                Newsletter
               </button>
-            </div>
-          )}
+            </li>
+          </ul>
+
+          {/* User Menu */}
+          <div className="navbar-buttons">
+            {user ? (
+              <div className="user-menu">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="user-button"
+                >
+                  <Image
+                    src={user.profile?.profile_image_url || avatar}
+                    alt="User Avatar"
+                    width={40}
+                    height={40}
+                    className="user-avatar"
+                  />
+                  <span>{user.username}</span>
+                </button>
+                {showUserMenu && (
+                  <div className="user-dropdown">
+                    <Link href="/profile" className="dropdown-item">
+                      Edit Profile
+                    </Link>
+                    <button onClick={handleSignOut} className="dropdown-item">
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="auth-buttons">
+                <Link href="/contact-sales" className="btn btn-primary">
+                  Contact Sales
+                </Link>
+                <Link href="/login" className="btn btn-secondary">
+                  Retailer Login
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </div>
+      </nav>
+
+      {showPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="relative">
+            <button 
+              onClick={() => setShowPopup(false)}
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+            >
+              ✕
+            </button>
+            <NewsletterPopup />
+          </div>
+        </div>
+      )}
+    </>
   );
 }
