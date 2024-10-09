@@ -6,7 +6,7 @@ import Link from "next/link";
 import { supabase } from "../utils/supabase";
 import avatar from "../public/avatar/user_default_1.jpeg";
 import logo from "../public/logo.png";
-import NewsletterPopup from '@/components/NewsletterPopup';
+import NewsletterPopup from "@/components/NewsletterPopup";
 
 type User = { id: string; username: string } | null;
 
@@ -44,13 +44,13 @@ export default function TopBar() {
         <div className="navbar-container">
           {/* Logo */}
           <Link href="/" className="navbar-logo">
-            <Image 
-              src={logo} 
-              alt="EQL Logo" 
-              width={100} 
-              // height={100} 
+            <Image
+              src={logo}
+              alt="EQL Logo"
+              width={100}
+              // height={100}
               style={{
-                width: 'auto',
+                width: "auto",
                 // height: 'auto',
               }}
             />
@@ -107,13 +107,13 @@ export default function TopBar() {
             </li>
 
             <li className="navbar-item">
-              <Link href="/pricing" className="navbar-link">
+              <Link href="/" className="navbar-link">
                 Pricing
               </Link>
             </li>
             <li className="navbar-item">
-              <button 
-                onClick={() => setShowPopup(true)} 
+              <button
+                onClick={() => setShowPopup(true)}
                 className="navbar-link"
               >
                 Newsletter
@@ -130,7 +130,7 @@ export default function TopBar() {
                   className="user-button"
                 >
                   <Image
-                    src={ avatar}
+                    src={avatar}
                     alt="User Avatar"
                     width={40}
                     height={40}
@@ -150,14 +150,15 @@ export default function TopBar() {
                 )}
               </div>
             ) : (
-              <div className="auth-buttons">
-                <Link href="/contact-sales" className="btn btn-primary">
-                  Contact Sales
-                </Link>
-                <Link href="/login" className="btn btn-secondary">
-                  Retailer Login
-                </Link>
-              </div>
+              <></>
+              // <div className="auth-buttons">
+              //   <Link href="/" className="btn btn-primary">
+              //     Contact Sales
+              //   </Link>
+              //   <Link href="/login" className="btn btn-secondary">
+              //     Retailer Login
+              //   </Link>
+              // </div>
             )}
           </div>
         </div>
@@ -166,7 +167,7 @@ export default function TopBar() {
       {showPopup && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="relative">
-            <button 
+            <button
               onClick={() => setShowPopup(false)}
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
             >
