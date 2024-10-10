@@ -14,8 +14,24 @@ import remarkGfm from "remark-gfm";
 export default function ArticleContent({ article, user }: { article: Article, user: any }) {
   return (
     <>
-      <div className="prose prose-lg dark:prose-invert max-w-none mb-4">
-        <ReactMarkdown remarkPlugins={[remarkGfm as any]}>
+      <div className="prose prose-lg dark:prose-invert max-w-none mb-4 custom-markdown">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm as any]}
+          components={{
+            code({node, inline, className, children, ...props}) {
+              const match = /language-(\w+)/.exec(className || '')
+              return !inline && match ? (
+                <code className={`block ${className}`} {...props}>
+                  {children}
+                </code>
+              ) : (
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              )
+            }
+          }}
+        >
           {article.content}
         </ReactMarkdown>
       </div>

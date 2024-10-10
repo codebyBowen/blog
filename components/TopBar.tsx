@@ -17,6 +17,7 @@ export default function TopBar() {
   const [showPlatformMenu, setShowPlatformMenu] = useState(false);
   const [showResourcesMenu, setShowResourcesMenu] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -48,7 +49,6 @@ export default function TopBar() {
               src={logo}
               alt="EQL Logo"
               width={100}
-              // height={100}
               style={{
                 width: "auto",
                 // height: 'auto',
@@ -56,8 +56,16 @@ export default function TopBar() {
             />
           </Link>
 
+          {/* Hamburger menu for mobile */}
+          <button 
+            className="md:hidden float-right p-2"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            ☰
+          </button>
+
           {/* Navigation Menu */}
-          <ul className="navbar-menu">
+          <ul className={`navbar-menu ${isMenuOpen ? 'block' : 'hidden'} md:flex`}>
             {/* Platform Dropdown */}
             <li
               className="navbar-item dropdown"
@@ -122,7 +130,7 @@ export default function TopBar() {
           </ul>
 
           {/* User Menu */}
-          <div className="navbar-buttons">
+          {/* <div className="navbar-buttons">
             {user ? (
               <div className="user-menu">
                 <button
@@ -160,7 +168,7 @@ export default function TopBar() {
               //   </Link>
               // </div>
             )}
-          </div>
+          </div> */}
         </div>
       </nav>
 
