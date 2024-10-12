@@ -7,6 +7,7 @@ import { Article } from "../../../types/article";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import slugify from "slugify";
+import { Components } from 'react-markdown'
 
 // const remarkGfm = dynamic(
 //   () => import("remark-gfm").then((mod) => mod.default),
@@ -25,31 +26,37 @@ export default function ArticleContent({
   >([]);
   const [showToc, setShowToc] = useState(true);
 
-  const customRenderers = {
-    h1: ({ node, ...props }: { node: React.ReactNode; [key: string]: any }) => {
-      const id = slugify(props.children[0], { lower: true, strict: true });
-      return <h1 id={id} {...props} />;
+  const customRenderers: Partial<Components> = {
+    code({ node, inline, className, children, ...props }) {
+      const match = /language-(\w+)/.exec(className || "");
+      return !inline && match ? (
+        <code className={`block ${className}`} {...props}>
+          {children}
+        </code>
+      ) : (
+        <code className={className} {...props}>
+          {children}
+        </code>
+      );
     },
-    h2: ({ node, ...props }: { node: React.ReactNode; [key: string]: any }) => {
-      const id = slugify(props.children[0], { lower: true, strict: true });
-      return <h2 id={id} {...props} />;
-    },
-    h3: ({ node, ...props }: { node: React.ReactNode; [key: string]: any }) => {
-      const id = slugify(props.children[0], { lower: true, strict: true });
-      return <h3 id={id} {...props} />;
-    },
-    h4: ({ node, ...props }: { node: React.ReactNode; [key: string]: any }) => {
-      const id = slugify(props.children[0], { lower: true, strict: true });
-      return <h4 id={id} {...props} />;
-    },
-    h5: ({ node, ...props }: { node: React.ReactNode; [key: string]: any }) => {
-      const id = slugify(props.children[0], { lower: true, strict: true });
-      return <h5 id={id} {...props} />;
-    },
-    h6: ({ node, ...props }: { node: React.ReactNode; [key: string]: any }) => {
-      const id = slugify(props.children[0], { lower: true, strict: true });
-      return <h6 id={id} {...props} />;
-    },
+    h1: ({ node, ...props }) => (
+      <h1 {...props}>{(node as any).children[0].value}</h1>
+    ),
+    h2: ({ node, ...props }) => (
+      <h2 {...props}>{(node as any).children[0].value}</h2>
+    ),
+    h3: ({ node, ...props }) => (
+      <h3 {...props}>{(node as any).children[0].value}</h3>
+    ),
+    h4: ({ node, ...props }) => (
+      <h4 {...props}>{(node as any).children[0].value}</h4>
+    ),
+    h5: ({ node, ...props }) => (
+      <h5 {...props}>{(node as any).children[0].value}</h5>
+    ),
+    h6: ({ node, ...props }) => (
+      <h6 {...props}>{(node as any).children[0].value}</h6>
+    ),
   };
 
   useEffect(() => {
@@ -67,21 +74,7 @@ export default function ArticleContent({
       <div className="prose prose-lg dark:prose-invert max-w-none mb-4 custom-markdown dark:prose-headings:text-white dark:prose-code:text-white">
         <ReactMarkdown
           remarkPlugins={[remarkGfm as any]}
-          components={{
-            ...customRenderers,
-            code({ node, inline, className, children, ...props }) {
-              const match = /language-(\w+)/.exec(className || "");
-              return !inline && match ? (
-                <code className={`block ${className}`} {...props}>
-                  {children}
-                </code>
-              ) : (
-                <code className={className} {...props}>
-                  {children}
-                </code>
-              );
-            },
-          }}
+          components={customRenderers}
         >
           {article.markdown_content || article.content}
         </ReactMarkdown>
