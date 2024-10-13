@@ -8,6 +8,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import slugify from "slugify";
 import { Components } from 'react-markdown'
+import { ReactNode } from 'react'
 
 // const remarkGfm = dynamic(
 //   () => import("remark-gfm").then((mod) => mod.default),
@@ -39,15 +40,9 @@ export default function ArticleContent({
         </code>
       );
     },
-    h1: ({ node, ...props }) => (
-      <h1 {...props}>{(node as any).children[0].value}</h1>
-    ),
-    h2: ({ node, ...props }) => (
-      <h2 {...props}>{(node as any).children[0].value}</h2>
-    ),
-    h3: ({ node, ...props }) => (
-      <h3 {...props}>{(node as any).children[0].value}</h3>
-    ),
+    h1: ({ children }: { children: ReactNode }) => <h1>{children}</h1>,
+    h2: ({ children }: { children: ReactNode }) => <h2>{children}</h2>,
+    h3: ({ children }: { children: ReactNode }) => <h3>{children}</h3>,
     h4: ({ node, ...props }) => (
       <h4 {...props}>{(node as any).children[0].value}</h4>
     ),
