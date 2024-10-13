@@ -26,6 +26,22 @@ export default function LoginPage() {
     }
   }
 
+  const handleSupabaseLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',  // You can change this to 'github', 'facebook', etc.
+      })
+      if (error) throw error
+      // The redirect is handled by Supabase, so we don't need to use router.push here
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message)
+      } else {
+        setError('An unknown error occurred')
+      }
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -85,6 +101,16 @@ export default function LoginPage() {
               Sign in
             </button>
           </div>
+          
+          {/* <div className="mt-4">
+            <button
+              type="button"
+              onClick={handleSupabaseLogin}
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            >
+              Sign in with Google
+            </button>
+          </div> */}
         </form>
         <div className="text-center">
           <Link href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">

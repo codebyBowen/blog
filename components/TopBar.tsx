@@ -130,7 +130,7 @@ export default function TopBar() {
           </ul>
 
           {/* User Menu */}
-          {/* <div className="navbar-buttons">
+          <div className="navbar-buttons">
             {user ? (
               <div className="user-menu">
                 <button
@@ -158,17 +158,16 @@ export default function TopBar() {
                 )}
               </div>
             ) : (
-              <></>
-              // <div className="auth-buttons">
-              //   <Link href="/" className="btn btn-primary">
-              //     Contact Sales
-              //   </Link>
-              //   <Link href="/login" className="btn btn-secondary">
-              //     Retailer Login
-              //   </Link>
-              // </div>
+              <div className="auth-buttons">
+                <Link href="/contact" className="btn btn-primary">
+                  Contact Us
+                </Link>
+                <Link href="/login" className="btn btn-secondary">
+                  Login
+                </Link>
+              </div>
             )}
-          </div> */}
+          </div>
         </div>
       </nav>
 
