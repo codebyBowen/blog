@@ -9,8 +9,8 @@ import Providers from "@/components/NextThemeProvider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Article Blog",
-  description: "A modern blog built with Next.js and Tailwind CSS",
+  title: "bowvee",
+  description: "A modern content management system built with Next.js and Tailwind CSS, where you can create, manage, and share your content with ease.",
 };
 
 export default async function RootLayout({
