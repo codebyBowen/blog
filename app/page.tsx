@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import TopBar from "@/components/TopBar";
 import LearnMoreBtn from "@/components/LearnMoreBtn";
 import CreateBtn from "@/components/CreateButton";
+import { stripMarkdown } from '@/utils/textUtils'; 
 
 
 export const revalidate = 0;
@@ -48,7 +49,7 @@ export default async function HomePage() {
                   {article.title}
                 </h2>
                 <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  {article.content.substring(0, 100)}...
+                  {stripMarkdown(article.content).substring(0, 100)}...
                 </p>
                 <div className="flex justify-between items-center">
                   <Link
