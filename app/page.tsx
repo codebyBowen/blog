@@ -12,12 +12,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, User, Search } from 'lucide-react';
+import { Article } from '../types/article';
 
 export const revalidate = 0;
 
 export default function HomePage() {
-  const [articles, setArticles] = useState([]);
-  const [visibleArticles, setVisibleArticles] = useState([]);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [visibleArticles, setVisibleArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

@@ -6,4 +6,6 @@ export interface Article {
   image_url?: string;
   audio_url?: string;
   created_at: string;
+  image?: string;
+  views: number;
 }

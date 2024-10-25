@@ -38,7 +38,7 @@ export default function ArticleContent({
     return ({ children, ...props }: { children: ReactNode }) => {
       const headingText = getTextFromChildren(children);
       const baseId = slugify(headingText, { lower: true, strict: true });
-      const id = `${baseId}-${props.key}`; // 使用 React 的 key 属性来确保唯一性
+      const id = `${baseId}-${Math.random().toString(36).substr(2, 9)}`; // Generate a unique ID
       const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
       return (
         <HeadingTag
