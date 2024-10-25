@@ -6,6 +6,7 @@ import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import TopBar from "@/components/TopBar";
 import BackToMenuButton from "@/components/BackToMenuButton";
 import ArticleContent from "./ArticleContent";
+import ArticleView from '@/components/ArticleView';
 
 export const revalidate = 0; // disable cache for this page
 
@@ -43,6 +44,8 @@ export default async function ArticlePage({
   if (!article)
     return <div className="container mx-auto p-4">Article not found</div>;
 
+  const articleId = parseInt(params.id);
+
   return (
     <>
       <TopBar />
@@ -58,6 +61,7 @@ export default async function ArticlePage({
             <BackToMenuButton />
           </div>
         </div>
+        <ArticleView articleId={articleId} />
       </div>
     </>
   );

@@ -1,99 +1,144 @@
-import Link from "next/link";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
-import TopBar from "@/components/TopBar";
-import LearnMoreBtn from "@/components/LearnMoreBtn";
-import CreateBtn from "@/components/CreateButton";
-import { stripMarkdown } from '@/utils/textUtils'; 
+'use client'
 
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import TopBar from "@/components/TopBar";
+import CreateBtn from "@/components/CreateButton";
+import { stripMarkdown } from '@/utils/textUtils';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Clock, User, Search } from 'lucide-react';
 
 export const revalidate = 0;
 
-async function getArticles() {
-  const supabase = createServerComponentClient({ cookies });
-  const { data: articles } = await supabase
-    .from("articles")
-    .select("*")
-    .order("created_at", { ascending: false });
+export default function HomePage() {
+  const [articles, setArticles] = useState([]);
+  const [visibleArticles, setVisibleArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  return articles || [];
-}
+  useEffect(() => {
+    const fetchArticles = async () => {
+      const supabase = createClientComponentClient();
+      const { data } = await supabase
+        .from("articles")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-export default async function HomePage() {
-  const articles = await getArticles();
+      setArticles(data || []);
+      setVisibleArticles(data?.slice(0, 5) || []);
+      setLoading(false);
+    };
+
+    fetchArticles();
+  }, []);
+
+  const loadMorePosts = () => {
+    const currentLength = visibleArticles.length;
+    const nextArticles = articles.slice(currentLength, currentLength + 5);
+    setVisibleArticles([...visibleArticles, ...nextArticles]);
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>
-      {" "}
       <TopBar />
-      <div className="container mx-auto px-4 py-8">
-        {/* <h1 className="text-4xl font-bold mb-8 text-center dark:text-white">
-          文章列表
-        </h1> */}
-        {/* <div className="mb-8 text-center">
-          <Link
-            href="/create"
-            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-110 dark:bg-blue-700 dark:hover:bg-blue-800"
-          >
-            创建新文章
-          </Link>
-        </div> */}
-        <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-6">
-          {articles.map((article) => (
-            <div
-              key={article.id}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition duration-300 ease-in-out"
-            >
-              <div className="p-6">
-                <h2 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white">
-                  {article.title}
-                </h2>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  {stripMarkdown(article.content).substring(0, 100)}...
-                </p>
-                <div className="flex justify-between items-center">
-                  <Link
-                    href={`/article/${article.id}`}
-                    className="hover:text-grey-300 dark:text-blue-400 dark:hover:text-grey-300 font-medium"
-                  >
-                    {/* <LearnMoreBtn /> */}
-                    {" Learn More >"}
-                  </Link>
-                  <div className="flex items-center space-x-4">
-                    <span className="flex items-center text-gray-500 dark:text-gray-400">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 mr-1"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
-                      </svg>
-                      {Math.floor(Math.random() * 100)} {/* 模拟点赞数 */}
-                    </span>
-                    <span className="flex items-center text-gray-500 dark:text-gray-400">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5 mr-1"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                        <path
-                          fillRule="evenodd"
-                          d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      {Math.floor(Math.random() * 1000)} {/* 模拟浏览数 */}
-                    </span>
-                  </div>
+      <main className="flex-grow bg-background">
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              {visibleArticles.map((article, index) => (
+                <Card key={article.id} className={index === 0 ? "mb-8" : "mb-6"}>
+                  {index === 0 && article.image && (
+                    <Image src={article.image} height={400} width={800} alt="Featured blog post" className="w-full h-64 object-cover" />
+                  )}
+                  <CardHeader>
+                    <CardTitle className={index === 0 ? "text-2xl" : "text-xl"}>{article.title}</CardTitle>
+                    <CardDescription>{stripMarkdown(article.content).substring(0, 100)}...</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                      <span className="flex items-center"><User size={16} className="mr-1" /> Author</span>
+                      <span className="flex items-center"><Calendar size={16} className="mr-1" /> {new Date(article.created_at).toLocaleDateString()}</span>
+                      <span className="flex items-center"><Clock size={16} className="mr-1" /> 5 min read</span>
+                      <span className="flex items-center"><Search size={16} className="mr-1" /> {article.views} views</span>
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Link href={`/article/${article.id}`}>
+                      <Button variant={index === 0 ? "default" : "outline"}>Read More</Button>
+                    </Link>
+                  </CardFooter>
+                </Card>
+              ))}
+              {visibleArticles.length < articles.length && (
+                <div className="mt-8 flex justify-center">
+                  <Button variant="outline" onClick={loadMorePosts}>Load More Posts</Button>
                 </div>
-              </div>
+              )}
             </div>
-          ))}
+
+            <div className="space-y-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Categories</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="secondary">Web Development</Badge>
+                    <Badge variant="secondary">JavaScript</Badge>
+                    <Badge variant="secondary">React</Badge>
+                    <Badge variant="secondary">Node.js</Badge>
+                    <Badge variant="secondary">UI/UX Design</Badge>
+                    <Badge variant="secondary">DevOps</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Popular Posts</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-4">
+                    {articles.slice(0, 3).map((article) => (
+                      <li key={article.id} className="flex items-center space-x-4">
+                        {article.image && (
+                          <Image src={article.image} height={80} width={80} alt={`Popular post ${article.id}`} className="w-20 h-20 object-cover rounded" />
+                        )}
+                        <div>
+                          <h3 className="font-semibold">{article.title}</h3>
+                          <p className="text-sm text-muted-foreground">{new Date(article.created_at).toLocaleDateString()}</p>
+                          <p className="text-sm text-muted-foreground">{article.views} views</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Newsletter</CardTitle>
+                  <CardDescription>Stay updated with our latest blog posts and news.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form className="space-y-4">
+                    <Input type="email" placeholder="Enter your email" />
+                    <Button className="w-full">Subscribe</Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
-      </div>
+      </main>
       <CreateBtn />
     </>
   );

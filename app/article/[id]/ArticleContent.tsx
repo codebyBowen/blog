@@ -35,14 +35,16 @@ export default function ArticleContent({
   };
 
   const createHeadingComponent = (level: number) => {
-    return ({ children }: { children: ReactNode }) => {
+    return ({ children, ...props }: { children: ReactNode }) => {
       const headingText = getTextFromChildren(children);
-      const id = slugify(headingText, { lower: true, strict: true });
+      const baseId = slugify(headingText, { lower: true, strict: true });
+      const id = `${baseId}-${props.key}`; // 使用 React 的 key 属性来确保唯一性
       const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
       return (
         <HeadingTag
           id={id}
-          style={{ scrollMarginTop: "80px" }} // Adjust according to your fixed header height
+          style={{ scrollMarginTop: "80px" }}
+          {...props}
         >
           {children}
         </HeadingTag>
@@ -74,11 +76,11 @@ export default function ArticleContent({
   useEffect(() => {
     const content = article.markdown_content || article.content;
     const headings = content.match(/#{1,6}.+/g) || [];
-    const tocItems = headings.map((heading) => {
+    const tocItems = headings.map((heading, index) => {
       const level = heading.match(/^#+/)?.[0].length ?? 1;
       const title = heading.replace(/^#+\s*/, "").replace(/[*_`]/g, "");
       const id = slugify(title, { lower: true, strict: true });
-      return { id, title, level };
+      return { id: `${id}-${index}`, title, level }; // 添加索引以确保唯一性
     });
     setToc(tocItems);
 
