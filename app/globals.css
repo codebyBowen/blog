@@ -189,7 +189,11 @@ body {
 }
 
 .custom-markdown code {
-  color: black !important;
+  color: black;
+}
+
+.dark .custom-markdown code {
+  color: white;
 }
 
 .custom-markdown .highlight {

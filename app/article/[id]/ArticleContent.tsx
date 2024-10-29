@@ -1,12 +1,26 @@
 "use client";
 
-import React, { useState, useEffect, useRef, ReactNode } from "react";
+import React from "react";
 import { Article } from "../../../types/article";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import slugify from "slugify";
 import { Components } from "react-markdown";
 import Image from "@/components/Image";
+import readingDuration from "reading-duration";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faClock } from "@fortawesome/free-solid-svg-icons";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useTheme } from "next-themes";
+
+const slugify = (text: string | React.ReactNode): string => {
+  const str = typeof text === 'string' ? text : Array.isArray(text) ? text.join('') : String(text);
+  
+  return str
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+};
 
 export default function ArticleContent({
   article,
@@ -15,147 +29,82 @@ export default function ArticleContent({
   article: Article;
   user: any;
 }) {
-  const [toc, setToc] = useState<
-    { id: string; title: string; level: number }[]
-  >([]);
-  const [activeId, setActiveId] = useState("");
-  const [showToc, setShowToc] = useState(false); // TOC is hidden by default
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  const getTextFromChildren = (children: ReactNode): string => {
-    if (typeof children === "string") {
-      return children;
-    } else if (Array.isArray(children)) {
-      return children.map(getTextFromChildren).join("");
-    } else if (React.isValidElement(children) && children.props.children) {
-      return getTextFromChildren(children.props.children);
-    } else {
-      return "";
-    }
-  };
-
-  const createHeadingComponent = (level: number) => {
-    return ({ children, ...props }: { children: ReactNode }) => {
-      const headingText = getTextFromChildren(children);
-      const baseId = slugify(headingText, { lower: true, strict: true });
-      const id = `${baseId}-${Math.random().toString(36).substr(2, 9)}`; // Generate a unique ID
-      const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
-      return (
-        <HeadingTag
-          id={id}
-          style={{ scrollMarginTop: "80px" }}
-          {...props}
-        >
-          {children}
-        </HeadingTag>
-      );
-    };
-  };
+  const { theme } = useTheme();
+  const isDarkMode = theme === "dark";
 
   const customRenderers: Partial<Components> = {
     code({ node, inline, className, children, ...props }) {
       const match = /language-(\w+)/.exec(className || "");
+      const language = match ? match[1] : "";
+      
       return !inline && match ? (
-        <code className={`block ${className}`} {...props}>
-          {children}
-        </code>
+        <SyntaxHighlighter
+          style={isDarkMode ? vscDarkPlus : vs as any}
+          language={language}
+          PreTag="div"
+          className="rounded-md"
+          {...props}
+        >
+          {String(children).replace(/\n$/, '')}
+        </SyntaxHighlighter>
       ) : (
-        <code className={className} {...props}>
+        <code 
+          className={`${className} px-1 rounded [&]:dark:text-white [&]:dark:bg-gray-800`} 
+          {...props}
+        >
           {children}
         </code>
       );
     },
-    h1: createHeadingComponent(1),
-    h2: createHeadingComponent(2),
-    h3: createHeadingComponent(3),
-    h4: createHeadingComponent(4),
-    h5: createHeadingComponent(5),
-    h6: createHeadingComponent(6),
+    h1: ({ children }) => (
+      <h1 id={slugify(children)}>
+        {children}
+      </h1>
+    ),
+    h2: ({ children }) => (
+      <h2 id={slugify(children)}>
+        {children}
+      </h2>
+    ),
+    h3: ({ children }) => (
+      <h3 id={slugify(children)}>
+        {children}
+      </h3>
+    ),
+    h4: ({ children }) => (
+      <h4 id={slugify(children)}>
+        {children}
+      </h4>
+    ),
   };
 
-  useEffect(() => {
-    const content = article.markdown_content || article.content;
-    const headings = content.match(/#{1,6}.+/g) || [];
-    const tocItems = headings.map((heading, index) => {
-      const level = heading.match(/^#+/)?.[0].length ?? 1;
-      const title = heading.replace(/^#+\s*/, "").replace(/[*_`]/g, "");
-      const id = slugify(title, { lower: true, strict: true });
-      return { id: `${id}-${index}`, title, level }; // 添加索引以确保唯一性
-    });
-    setToc(tocItems);
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
-          }
-        });
-      },
-      { rootMargin: "-80px 0px -80% 0px" }
-    );
-
-    tocItems.forEach(({ id }) => {
-      const element = document.getElementById(id);
-      if (element) observer.observe(element);
-    });
-
-    return () => observer.disconnect();
-  }, [article]);
+  const readingTime = readingDuration(
+    article.markdown_content || article.content,
+    {
+      wordsPerMinute: 200,
+      emoji: false,
+    }
+  );
 
   return (
-    <div className="relative">
-      {/* TOC Overlay */}
-      <div
-        className={`fixed top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 shadow-lg z-50 transform transition-transform duration-300 ${
-          showToc ? "translate-x-0" : "-translate-x-full"
-        }`}
-        style={{ paddingTop: "80px" }} // Adjust to not overlap header bar
-      >
-        <div className="p-4 overflow-y-auto h-full">
-          <button
-            onClick={() => setShowToc(false)}
-            className="mb-4 text-gray-700 dark:text-gray-300"
-          >
-            Close
-          </button>
-          <h2 className="text-xl font-bold mb-4 dark:text-white">Contents</h2>
-          <ul className="space-y-2 text-sm">
-            {toc.map((item) => (
-              <li
-                key={item.id}
-                style={{ marginLeft: `${(item.level - 1) * 8}px` }}
-              >
-                <a
-                  href={`#${item.id}`}
-                  className={`block py-1 ${
-                    activeId === item.id
-                      ? "text-blue-500 font-semibold"
-                      : "text-gray-700 hover:text-blue-500 dark:text-gray-300 dark:hover:text-blue-400"
-                  }`}
-                >
-                  {item.title}
-                </a>
-              </li>
-            ))}
-          </ul>
+    <article>
+      <header className="mb-8">
+        <h1 className="font-sans text-[#242424] dark:text-white font-bold text-3xl md:text-[42px] leading-tight md:leading-[52px] tracking-normal md:tracking-[-0.011em] mb-4 md:mb-8 mt-0 break-words overflow-wrap-break-word">
+          {article.title}
+        </h1>
+        <div className="flex items-center text-gray-500">
+          <FontAwesomeIcon icon={faClock} className="mr-2" width={16} height={16} />
+          <span>{readingTime}</span>
         </div>
-      </div>
+      </header>
 
-      {/* TOC Toggle Button */}
-      <button
-        onClick={() => setShowToc(!showToc)}
-        className="fixed top-24 left-8 z-10 bg-gray-200 dark:bg-gray-700 p-2 rounded-full shadow-md w-10 h-10 flex flex-col justify-center items-center"
-      >
-        <span className="block w-5 h-0.5 bg-gray-600 dark:bg-gray-300 mb-1"></span>
-        <span className="block w-5 h-0.5 bg-gray-600 dark:bg-gray-300 mb-1"></span>
-        <span className="block w-5 h-0.5 bg-gray-600 dark:bg-gray-300"></span>
-      </button>
-
-      {/* Main Content */}
-      <div
-        ref={contentRef}
-        className="prose prose-lg dark:prose-invert max-w-none mb-4 custom-markdown dark:prose-headings:text-white dark:prose-code:text-white"
+      <div className="prose prose-lg dark:prose-invert max-w-none mb-4 custom-markdown 
+        dark:prose-headings:text-white 
+        dark:prose-code:text-white 
+        [&_.token]:!dark:text-white
+        [&_span[class*='token']]:!dark:text-white
+        [&_span[class*='language-']]:!dark:text-white
+        [&_span[class*='liquid']]:!dark:text-white"
       >
         <ReactMarkdown
           remarkPlugins={[remarkGfm as any]}
@@ -174,6 +123,6 @@ export default function ArticleContent({
           )}
         </div>
       </div>
-    </div>
+    </article>
   );
 }

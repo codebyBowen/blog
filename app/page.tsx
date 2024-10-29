@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, User, Search } from 'lucide-react';
 import { Article } from '../types/article';
+import readingDuration from "reading-duration";
+// import NewsletterPopup from "@/components/NewsletterPopup";
 
 export const revalidate = 0;
 
@@ -54,30 +56,37 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
-              {visibleArticles.map((article, index) => (
-                <Card key={article.id} className={index === 0 ? "mb-8" : "mb-6"}>
-                  {index === 0 && article.image && (
-                    <Image src={article.image} height={400} width={800} alt="Featured blog post" className="w-full h-64 object-cover" />
-                  )}
-                  <CardHeader>
-                    <CardTitle className={index === 0 ? "text-2xl" : "text-xl"}>{article.title}</CardTitle>
-                    <CardDescription>{stripMarkdown(article.content).substring(0, 100)}...</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                      <span className="flex items-center"><User size={16} className="mr-1" /> Author</span>
-                      <span className="flex items-center"><Calendar size={16} className="mr-1" /> {new Date(article.created_at).toLocaleDateString()}</span>
-                      <span className="flex items-center"><Clock size={16} className="mr-1" /> 5 min read</span>
-                      <span className="flex items-center"><Search size={16} className="mr-1" /> {article.views} views</span>
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Link href={`/article/${article.id}`}>
-                      <Button variant={index === 0 ? "default" : "outline"}>Read More</Button>
-                    </Link>
-                  </CardFooter>
-                </Card>
-              ))}
+              {visibleArticles.map((article, index) => {
+                const readingTime = readingDuration(article.content, {
+                  wordsPerMinute: 200,
+                  emoji: false,
+                });
+
+                return (
+                  <Card key={article.id} className={index === 0 ? "mb-8" : "mb-6"}>
+                    {index === 0 && article.image && (
+                      <Image src={article.image} height={400} width={800} alt="Featured blog post" className="w-full h-64 object-cover" />
+                    )}
+                    <CardHeader>
+                      <CardTitle className={index === 0 ? "text-2xl" : "text-xl"}>{article.title}</CardTitle>
+                      <CardDescription>{stripMarkdown(article.content).substring(0, 100)}...</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                        <span className="flex items-center"><User size={16} className="mr-1" /> Author</span>
+                        <span className="flex items-center"><Calendar size={16} className="mr-1" /> {new Date(article.created_at).toLocaleDateString()}</span>
+                        <span className="flex items-center"><Clock size={16} className="mr-1" /> {readingTime}</span>
+                        <span className="flex items-center"><Search size={16} className="mr-1" /> {article.views} views</span>
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      <Link href={`/article/${article.id}`}>
+                        <Button variant={index === 0 ? "default" : "outline"}>Read More</Button>
+                      </Link>
+                    </CardFooter>
+                  </Card>
+                );
+              })}
               {visibleArticles.length < articles.length && (
                 <div className="mt-8 flex justify-center">
                   <Button variant="outline" onClick={loadMorePosts}>Load More Posts</Button>
@@ -123,6 +132,7 @@ export default function HomePage() {
                   </ul>
                 </CardContent>
               </Card>
+              {/* <NewsletterPopup /> */}
 
               <Card>
                 <CardHeader>

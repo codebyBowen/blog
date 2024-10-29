@@ -41,7 +41,7 @@ export default function TopBar() {
 
   return (
     <>
-      <nav className="navbar">
+      <nav className="navbar bg-white dark:bg-gray-900">
         <div className="navbar-container">
           {/* Logo */}
           <Link href="/" className="navbar-logo">
@@ -51,14 +51,13 @@ export default function TopBar() {
               width={100}
               style={{
                 width: "auto",
-                // height: 'auto',
               }}
             />
           </Link>
 
           {/* Hamburger menu for mobile */}
           <button 
-            className="md:hidden float-right p-2"
+            className="md:hidden float-right p-2 text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             ☰
@@ -72,20 +71,20 @@ export default function TopBar() {
               onMouseEnter={() => setShowPlatformMenu(true)}
               onMouseLeave={() => setShowPlatformMenu(false)}
             >
-              <button className="navbar-link">Platform</button>
+              <button className="navbar-link text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">Platform</button>
               {showPlatformMenu && (
-                <ul className="dropdown-menu">
+                <ul className="dropdown-menu bg-white dark:bg-gray-800">
                   <li>
-                    <Link href="/overview" className="dropdown-link">
+                    <Link href="/overview" className="dropdown-link text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">
                       Overview
                     </Link>
                   </li>
                   <li>
-                    <Link href="/runfair" className="dropdown-link">
+                    <Link href="/runfair" className="dropdown-link text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">
                       What is Run Fair?
                     </Link>
                   </li>
-                  {/* 添加更多菜单项 */}
+                  {/* Add more menu items */}
                 </ul>
               )}
             </li>
@@ -96,33 +95,33 @@ export default function TopBar() {
               onMouseEnter={() => setShowResourcesMenu(true)}
               onMouseLeave={() => setShowResourcesMenu(false)}
             >
-              <button className="navbar-link">Resources</button>
+              <button className="navbar-link text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">Resources</button>
               {showResourcesMenu && (
-                <ul className="dropdown-menu">
+                <ul className="dropdown-menu bg-white dark:bg-gray-800">
                   <li>
-                    <Link href="/news" className="dropdown-link">
+                    <Link href="/news" className="dropdown-link text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">
                       Blog
                     </Link>
                   </li>
                   <li>
-                    <Link href="/newsletter" className="dropdown-link">
+                    <Link href="/newsletter" className="dropdown-link text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">
                       Newsletter
                     </Link>
                   </li>
-                  {/* 添加更多菜单项 */}
+                  {/* Add more menu items */}
                 </ul>
               )}
             </li>
 
             <li className="navbar-item">
-              <Link href="/" className="navbar-link">
+              <Link href="/" className="navbar-link text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">
                 Pricing
               </Link>
             </li>
             <li className="navbar-item">
               <button
                 onClick={() => setShowPopup(true)}
-                className="navbar-link"
+                className="navbar-link text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400"
               >
                 Newsletter
               </button>
@@ -135,7 +134,7 @@ export default function TopBar() {
               <div className="user-menu">
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="user-button"
+                  className="user-button text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400"
                 >
                   <Image
                     src={avatar}
@@ -147,11 +146,11 @@ export default function TopBar() {
                   <span>{user.username}</span>
                 </button>
                 {showUserMenu && (
-                  <div className="user-dropdown">
-                    <Link href="/profile" className="dropdown-item">
+                  <div className="user-dropdown bg-white dark:bg-gray-800">
+                    <Link href="/profile" className="dropdown-item text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">
                       Edit Profile
                     </Link>
-                    <button onClick={handleSignOut} className="dropdown-item">
+                    <button onClick={handleSignOut} className="dropdown-item text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">
                       Sign Out
                     </button>
                   </div>
@@ -159,10 +158,10 @@ export default function TopBar() {
               </div>
             ) : (
               <div className="auth-buttons">
-                <Link href="/contact" className="btn btn-primary">
+                <Link href="/contact" className="btn btn-primary text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">
                   Contact Us
                 </Link>
-                <Link href="/login" className="btn btn-secondary">
+                <Link href="/login" className="btn btn-secondary text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">
                   Login
                 </Link>
               </div>
