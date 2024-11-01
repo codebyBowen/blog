@@ -6,6 +6,7 @@ import Image from "next/image";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import TopBar from "@/components/TopBar";
 import CreateBtn from "@/components/CreateButton";
+import Loading from "@/components/Loading";
 import { stripMarkdown } from '@/utils/textUtils';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +21,7 @@ export const revalidate = 0;
 
 export default function HomePage() {
   const [articles, setArticles] = useState<Article[]>([]);
+  const [popularArticles, setPopularArticles] = useState<Article[]>([]);
   const [visibleArticles, setVisibleArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -31,8 +33,13 @@ export default function HomePage() {
         .select("*")
         .order("created_at", { ascending: false });
 
-      setArticles(data || []);
-      setVisibleArticles(data?.slice(0, 5) || []);
+      if (data) {
+        setArticles(data);
+        setVisibleArticles(data.slice(0, 5));
+        
+        const sortedByViews = [...data].sort((a, b) => b.views - a.views);
+        setPopularArticles(sortedByViews);
+      }
       setLoading(false);
     };
 
@@ -46,7 +53,11 @@ export default function HomePage() {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loading />
+      </div>
+    );
   }
 
   return (
@@ -117,13 +128,15 @@ export default function HomePage() {
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-4">
-                    {articles.slice(0, 3).map((article) => (
+                    {popularArticles.slice(0, 3).map((article) => (
                       <li key={article.id} className="flex items-center space-x-4">
                         {article.image && (
                           <Image src={article.image} height={80} width={80} alt={`Popular post ${article.id}`} className="w-20 h-20 object-cover rounded" />
                         )}
                         <div>
-                          <h3 className="font-semibold">{article.title}</h3>
+                          <Link href={`/article/${article.id}`}>
+                            <h3 className="font-semibold hover:text-primary">{article.title}</h3>
+                          </Link>
                           <p className="text-sm text-muted-foreground">{new Date(article.created_at).toLocaleDateString()}</p>
                           <p className="text-sm text-muted-foreground">{article.views} views</p>
                         </div>

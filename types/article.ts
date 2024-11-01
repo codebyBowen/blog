@@ -8,4 +8,6 @@ export interface Article {
   created_at: string;
   image?: string;
   views: number;
+  thumbs_up?: number;
+  thumbs_down?: number;
 }

@@ -8,10 +8,14 @@ import { Components } from "react-markdown";
 import Image from "@/components/Image";
 import readingDuration from "reading-duration";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faClock } from "@fortawesome/free-solid-svg-icons";
+import { faClock, faThumbsUp as fasThumbsUp, faThumbsDown as fasThumbsDown } from "@fortawesome/free-solid-svg-icons";
+import { faThumbsUp as farThumbsUp, faThumbsDown as farThumbsDown } from "@fortawesome/free-regular-svg-icons";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { useTheme } from "next-themes";
+import { useState, useEffect } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+
 
 const slugify = (text: string | React.ReactNode): string => {
   const str = typeof text === 'string' ? text : Array.isArray(text) ? text.join('') : String(text);
@@ -32,6 +36,75 @@ export default function ArticleContent({
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
 
+  const [thumbsUp, setThumbsUp] = useState(article.thumbs_up || 0);
+  const [thumbsDown, setThumbsDown] = useState(article.thumbs_down || 0);
+  const [userVote, setUserVote] = useState<'up' | 'down' | null>(null);
+
+  useEffect(() => {
+    // 从 localStorage 加载用户投票状态
+    const savedVote = localStorage.getItem(`vote-${article.id}`);
+    if (savedVote) {
+      setUserVote(savedVote as 'up' | 'down');
+    }
+  }, [article.id]);
+
+  const handleVote = async (voteType: 'up' | 'down') => {
+    console.log('Vote clicked:', voteType);
+    
+    const isRemovingVote = userVote === voteType;
+    const column = voteType === 'up' ? 'thumbup' : 'thumbdown';
+
+    try {
+      const supabase = createClientComponentClient();
+      
+      // 更新投票状态
+      setUserVote(isRemovingVote ? null : voteType);
+      
+      // 更新 localStorage
+      if (isRemovingVote) {
+        localStorage.removeItem(`vote-${article.id}`);
+      } else {
+        localStorage.setItem(`vote-${article.id}`, voteType);
+      }
+
+      // 更新数据库
+      const { data: currentArticle, error: fetchError } = await supabase
+        .from('articles')
+        .select('thumbup, thumbdown')
+        .eq('id', article.id)
+        .single();
+
+      if (fetchError) {
+        console.error('Error fetching article:', fetchError);
+        return;
+      }
+
+      const currentValue = (currentArticle as any)[column] || 0;
+      const newValue = Math.max(0, isRemovingVote ? currentValue - 1 : currentValue + 1);
+
+      const { data: updatedArticle, error } = await supabase
+        .from('articles')
+        .update({ [column]: newValue })
+        .eq('id', article.id)
+        .select('thumbup, thumbdown')
+        .single();
+
+      if (error) {
+        console.error('Error updating vote:', error);
+        return;
+      }
+
+      // 使用数据库返回的最新数据更新状态
+      if (updatedArticle) {
+        setThumbsUp(updatedArticle.thumbup || 0);
+        setThumbsDown(updatedArticle.thumbdown || 0);
+      }
+
+    } catch (error) {
+      console.error('Error in vote handling:', error);
+    }
+  };
+
   const customRenderers: Partial<Components> = {
     code({ node, inline, className, children, ...props }) {
       const match = /language-(\w+)/.exec(className || "");
@@ -42,7 +115,7 @@ export default function ArticleContent({
           style={isDarkMode ? vscDarkPlus : vs as any}
           language={language}
           PreTag="div"
-          className="rounded-md"
+          className="rounded-md scroll-mt-16"
           {...props}
         >
           {String(children).replace(/\n$/, '')}
@@ -57,22 +130,34 @@ export default function ArticleContent({
       );
     },
     h1: ({ children }) => (
-      <h1 id={slugify(children)}>
+      <h1 
+        id={slugify(children)} 
+        className="scroll-mt-16"
+      >
         {children}
       </h1>
     ),
     h2: ({ children }) => (
-      <h2 id={slugify(children)}>
+      <h2 
+        id={slugify(children)} 
+        className="scroll-mt-16"
+      >
         {children}
       </h2>
     ),
     h3: ({ children }) => (
-      <h3 id={slugify(children)}>
+      <h3 
+        id={slugify(children)} 
+        className="scroll-mt-16"
+      >
         {children}
       </h3>
     ),
     h4: ({ children }) => (
-      <h4 id={slugify(children)}>
+      <h4 
+        id={slugify(children)} 
+        className="scroll-mt-16"
+      >
         {children}
       </h4>
     ),
@@ -88,13 +173,43 @@ export default function ArticleContent({
 
   return (
     <article>
-      <header className="mb-8">
+      <header className="mb-8 scroll-mt-16">
         <h1 className="font-sans text-[#242424] dark:text-white font-bold text-3xl md:text-[42px] leading-tight md:leading-[52px] tracking-normal md:tracking-[-0.011em] mb-4 md:mb-8 mt-0 break-words overflow-wrap-break-word">
           {article.title}
         </h1>
-        <div className="flex items-center text-gray-500">
-          <FontAwesomeIcon icon={faClock} className="mr-2" width={16} height={16} />
-          <span>{readingTime}</span>
+        <div className="flex items-center gap-6 text-gray-500">
+          <div className="flex items-center">
+            <FontAwesomeIcon icon={faClock} className="mr-2" width={16} height={16} />
+            <span>{readingTime}</span>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => handleVote('up')}
+              className="flex items-center gap-1 hover:text-blue-500 transition-colors"
+            >
+              <FontAwesomeIcon 
+                icon={userVote === 'up' ? fasThumbsUp : farThumbsUp} 
+                className={userVote === 'up' ? 'text-blue-500' : ''} 
+                width={16} 
+                height={16} 
+              />
+              <span>{thumbsUp}</span>
+            </button>
+
+            <button 
+              onClick={() => handleVote('down')}
+              className="flex items-center gap-1 hover:text-red-500 transition-colors"
+            >
+              <FontAwesomeIcon 
+                icon={userVote === 'down' ? fasThumbsDown : farThumbsDown} 
+                className={userVote === 'down' ? 'text-red-500' : ''} 
+                width={16} 
+                height={16} 
+              />
+              <span>{thumbsDown}</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -104,7 +219,8 @@ export default function ArticleContent({
         [&_.token]:!dark:text-white
         [&_span[class*='token']]:!dark:text-white
         [&_span[class*='language-']]:!dark:text-white
-        [&_span[class*='liquid']]:!dark:text-white"
+        [&_span[class*='liquid']]:!dark:text-white
+        prose-headings:scroll-mt-16"
       >
         <ReactMarkdown
           remarkPlugins={[remarkGfm as any]}

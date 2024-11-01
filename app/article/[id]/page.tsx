@@ -11,6 +11,7 @@ import { getArticle, getRecentArticles } from '@/app/actions/articles'
 import { getUser } from '@/app/actions/auth'
 import { Metadata } from 'next';
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import TableOfContents from './TableOfContents';
 
 export const revalidate = 0; // disable cache for this page
 
@@ -77,16 +78,6 @@ export default async function ArticlePage({
     return <div className="container mx-auto p-4">Article not found</div>;
 
   const articleId = parseInt(params.id);
-  
-  // 从文章内容中提取标题
-  const content = article.markdown_content || article.content;
-  const headingRegex = /^(#{1,6})\s+(.+)$/gm;
-  const matches = Array.from(content.matchAll(headingRegex));
-  const headings = matches.map(match => ({
-    level: match[1].length,
-    title: match[2],
-    id: match[2].toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-  }));
 
   // 添加 JSON-LD 结构化数据
   const jsonLd = {
@@ -133,35 +124,20 @@ export default async function ArticlePage({
 
           {/* Main Content */}
           <div className="lg:w-2/4">
-            <ArticleContent article={article} user={user} />
-            <div className="flex justify-end mt-4 mb-10">
-              <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/8">
-                <BackToMenuButton />
+            <article className="article">
+              <ArticleContent article={article} user={user} />
+              <div className="flex justify-end mt-4 mb-10">
+                <div className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/8">
+                  <BackToMenuButton />
+                </div>
               </div>
-            </div>
-            <ArticleView articleId={articleId} />
+              <ArticleView articleId={articleId} />
+            </article>
           </div>
 
           {/* Right Sidebar - Table of Contents */}
           <aside className="hidden lg:block lg:w-1/4">
-            <nav className="sticky top-4">
-              <div className="font-semibold mb-4">Table of Contents</div>
-              <ul className="space-y-2">
-                {headings.map((heading) => (
-                  <li 
-                    key={heading.id}
-                    className={`pl-${(heading.level - 1) * 4}`}
-                  >
-                    <a 
-                      href={`#${heading.id}`}
-                      className="text-gray-600 dark:text-gray-300 hover:text-yellow-400 dark:hover:text-yellow-400"
-                    >
-                      {heading.title}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+            <TableOfContents />
           </aside>
         </div>
       </div>
