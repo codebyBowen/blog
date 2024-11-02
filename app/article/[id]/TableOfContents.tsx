@@ -5,25 +5,17 @@ import tocbot from 'tocbot';
 export default function TableOfContents() {
   useEffect(() => {
     tocbot.init({
-      // 要生成目录的内容区域
-      tocSelector: '.toc',           // 目录将被渲染到这个容器中
-      contentSelector: '.article',    // 文章内容区域
-      headingSelector: 'h1, h2, h3, h4, h5, h6', // 要提取的标题级别
-      
-      // 配置项
+      tocSelector: '.toc',
+      contentSelector: '.article',
+      headingSelector: 'h1, h2, h3, h4, h5, h6',
       hasInnerContainers: true,
-      collapseDepth: 6,
-      headingsOffset: 80,      // 滚动偏移量
+      headingsOffset: 80,
       scrollSmooth: true,
       scrollSmoothOffset: -80,
-      
-      // 类名配置
       linkClass: 'toc-link',
       activeLinkClass: 'is-active-link',
       listClass: 'toc-list',
-      isCollapsedClass: 'is-collapsed',
-      collapsibleClass: 'is-collapsible',
-      activeListItemClass: 'is-active-li',
+      activeListItemClass: 'is-active-li'
     });
 
     return () => tocbot.destroy();
@@ -31,8 +23,49 @@ export default function TableOfContents() {
 
   return (
     <nav className="sticky top-4">
-      <div className="font-semibold mb-4">TOC</div>
-      <div className="toc"></div>
+      <div className="toc">
+        <div className="font-semibold mb-4">TOC</div>
+        <style jsx>{`
+          .toc {
+            max-height: calc(100vh - 6rem);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #0002 transparent;
+          }
+          .toc::-webkit-scrollbar {
+            width: 6px;
+          }
+          .toc::-webkit-scrollbar-track {
+            background: transparent;
+          }
+          .toc::-webkit-scrollbar-thumb {
+            background-color: #0002;
+            border-radius: 3px;
+          }
+          .toc:not(:hover)::-webkit-scrollbar-thumb {
+            background-color: transparent;
+          }
+          :global(.toc-list) {
+            list-style: none;
+            padding-left: 1.5rem;
+            border-left: 1px solid rgba(0, 0, 0, 0.08);
+          }
+          :global(.toc-list .toc-list) {
+            padding-left: 1.5rem;
+            border-left: none;
+          }
+          :global(.toc-link) {
+            color: #666;
+            text-decoration: none;
+            display: block;
+            padding: 4px 0;
+          }
+          :global(.is-active-link) {
+            color: #000;
+            font-weight: 600;
+          }
+        `}</style>
+      </div>
     </nav>
   );
 }

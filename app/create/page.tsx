@@ -6,6 +6,10 @@ import { useRouter } from "next/navigation";
 import dynamic from 'next/dynamic';
 import 'react-markdown-editor-lite/lib/index.css';
 import MarkdownIt from 'markdown-it';
+import TopBar from "@/components/TopBar";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Dynamically import Markdown editor to avoid server-side rendering issues
 const MdEditor = dynamic(() => import('react-markdown-editor-lite'), {
@@ -21,6 +25,7 @@ export default function CreateArticle() {
   const [image, setImage] = useState<File | null>(null);
   const [audio, setAudio] = useState<File | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [tag, setTag] = useState<string>("");
   const router = useRouter();
 
   useEffect(() => {
@@ -42,6 +47,7 @@ export default function CreateArticle() {
     e.preventDefault();
     try {
       if (!userId) throw new Error("User not authenticated");
+      if (!tag) throw new Error("Please select a tag");
 
       let imagePath = null;
       let audioPath = null;
@@ -69,6 +75,7 @@ export default function CreateArticle() {
         image_url: imagePath,
         audio_url: audioPath,
         user_id: userId,
+        tag: tag,
       });
 
       if (error) throw error;
@@ -80,96 +87,99 @@ export default function CreateArticle() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center">
-            {/* Add your logo here */}
-            <span className="text-2xl font-bold text-gray-900">YourLogo</span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <button
-              type="submit"
-              form="create-article-form"
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full text-sm font-medium transition duration-150 ease-in-out"
-            >
-              Publish
-            </button>
-            <button className="text-gray-500 hover:text-gray-600">
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-              </svg>
-            </button>
-          </div>
+    <>
+      <TopBar />
+      <main className="flex-grow bg-background">
+        <div className="container mx-auto px-4 py-8">
+          <Card>
+            <CardHeader>
+              <input
+                type="text"
+                value={title}
+                onChange={(e: ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
+                placeholder="Title"
+                required
+                className="w-full text-4xl font-bold focus:outline-none placeholder-muted-foreground bg-transparent"
+              />
+            </CardHeader>
+            <CardContent>
+              <form id="create-article-form" onSubmit={handleSubmit} className="space-y-6">
+                <div className="prose max-w-none dark:prose-invert">
+                  <MdEditor
+                    style={{ height: '500px' }}
+                    renderHTML={(text) => mdParser.render(text)}
+                    onChange={handleEditorChange}
+                    config={{
+                      view: {
+                        menu: true,
+                        md: true,
+                        html: false
+                      }
+                    }}
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Image
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                          setImage(e.target.files ? e.target.files[0] : null)
+                        }
+                        className="mt-1 block w-full text-sm file:mr-4 file:py-2 file:px-4
+                                  file:rounded-full file:border-0
+                                  file:text-sm file:font-semibold
+                                  file:bg-primary file:text-primary-foreground
+                                  hover:file:bg-primary/90"
+                      />
+                    </label>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Audio
+                      <input
+                        type="file"
+                        accept="audio/*"
+                        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                          setAudio(e.target.files ? e.target.files[0] : null)
+                        }
+                        className="mt-1 block w-full text-sm file:mr-4 file:py-2 file:px-4
+                                  file:rounded-full file:border-0
+                                  file:text-sm file:font-semibold
+                                  file:bg-primary file:text-primary-foreground
+                                  hover:file:bg-primary/90"
+                      />
+                    </label>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Tag
+                      <Select onValueChange={setTag} required>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select a tag" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Web Development">Web Development</SelectItem>
+                          <SelectItem value="Finance">Finance</SelectItem>
+                          <SelectItem value="SEO">SEO</SelectItem>
+                          <SelectItem value="Life Experience">Life Experience</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </label>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <Button type="submit" size="lg">
+                    Publish
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
-      </header>
-
-      <main className="pt-20 pb-16 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto">
-        <form id="create-article-form" onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <input
-              type="text"
-              value={title}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
-              placeholder="Title"
-              required
-              className="w-full text-4xl font-bold focus:outline-none placeholder-gray-300"
-            />
-          </div>
-          <div className="prose max-w-none">
-            <MdEditor
-              style={{ height: '500px' }}
-              renderHTML={(text) => mdParser.render(text)}
-              onChange={handleEditorChange}
-              config={{
-                view: {
-                  menu: true,
-                  md: true,
-                  html: false
-                }
-              }}
-            />
-          </div>
-          <div className="flex space-x-4">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700">
-                Image
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setImage(e.target.files ? e.target.files[0] : null)
-                  }
-                  className="mt-1 block w-full text-sm text-gray-500
-                            file:mr-4 file:py-2 file:px-4
-                            file:rounded-full file:border-0
-                            file:text-sm file:font-semibold
-                            file:bg-green-50 file:text-green-700
-                            hover:file:bg-green-100"
-                />
-              </label>
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700">
-                Audio
-                <input
-                  type="file"
-                  accept="audio/*"
-                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                    setAudio(e.target.files ? e.target.files[0] : null)
-                  }
-                  className="mt-1 block w-full text-sm text-gray-500
-                            file:mr-4 file:py-2 file:px-4
-                            file:rounded-full file:border-0
-                            file:text-sm file:font-semibold
-                            file:bg-green-50 file:text-green-700
-                            hover:file:bg-green-100"
-                />
-              </label>
-            </div>
-          </div>
-        </form>
       </main>
-    </div>
+    </>
   );
 }

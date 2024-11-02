@@ -10,8 +10,7 @@ import readingDuration from "reading-duration";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClock, faThumbsUp as fasThumbsUp, faThumbsDown as fasThumbsDown } from "@fortawesome/free-solid-svg-icons";
 import { faThumbsUp as farThumbsUp, faThumbsDown as farThumbsDown } from "@fortawesome/free-regular-svg-icons";
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus, vs } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { CopyBlock, dracula } from "react-code-blocks";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
@@ -110,17 +109,21 @@ export default function ArticleContent({
       const match = /language-(\w+)/.exec(className || "");
       const language = match ? match[1] : "";
       
-      return !inline && match ? (
-        <SyntaxHighlighter
-          style={isDarkMode ? vscDarkPlus : vs as any}
-          language={language}
-          PreTag="div"
-          className="rounded-md scroll-mt-16"
-          {...props}
-        >
-          {String(children).replace(/\n$/, '')}
-        </SyntaxHighlighter>
-      ) : (
+      if (!inline && match) {
+        return (
+          <div className="dark">
+            <CopyBlock
+              text={String(children).replace(/\n$/, '')}
+              language={language}
+              showLineNumbers={true}
+              theme={dracula}
+              codeBlock
+            />
+          </div>
+        );
+      }
+      
+      return (
         <code 
           className={`${className} px-1 rounded [&]:dark:text-white [&]:dark:bg-gray-800`} 
           {...props}

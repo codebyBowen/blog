@@ -10,4 +10,5 @@ export interface Article {
   views: number;
   thumbs_up?: number;
   thumbs_down?: number;
+  tag?: string;
 }
