@@ -14,6 +14,8 @@ import { CopyBlock, dracula } from "react-code-blocks";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import remarkMath from 'remark-math';
+import rehypeKatex from 'rehype-katex';
 
 
 const slugify = (text: string | React.ReactNode): string => {
@@ -223,10 +225,26 @@ export default function ArticleContent({
         [&_span[class*='token']]:!dark:text-white
         [&_span[class*='language-']]:!dark:text-white
         [&_span[class*='liquid']]:!dark:text-white
-        prose-headings:scroll-mt-16"
+        prose-headings:scroll-mt-16
+        [&_.math-display]:overflow-x-auto
+        [&_.math-display]:max-w-full
+        [&_.math-display]:py-4
+        [&_.katex-display]:overflow-x-auto
+        [&_.katex-display]:max-w-full
+        [&_.katex]:overflow-x-auto
+        [&_.katex]:max-w-full
+        [&_.katex]:!text-black
+        dark:[&_.katex]:!text-white
+        [&_.katex-html]:!overflow-x-hidden
+        [&_.katex-html]:!max-w-full
+        [&_.katex]:!overflow-y-hidden
+        [&_.katex-display]:!overflow-y-hidden
+        [&_.katex]:!break-words
+        [&_.katex-display]:!break-words"
       >
         <ReactMarkdown
-          remarkPlugins={[remarkGfm as any]}
+          remarkPlugins={[remarkGfm as any, remarkMath]}
+          rehypePlugins={[rehypeKatex as any]}
           components={customRenderers}
         >
           {article.markdown_content || article.content}

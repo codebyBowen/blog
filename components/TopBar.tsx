@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { supabase } from "../utils/supabase";
 import avatar from "../public/avatar/user_default_1.jpeg";
-import logo from "../public/logo.png";
+import logo from "../public/thebowveelogo.png";
 import NewsletterPopup from "@/components/NewsletterPopup";
 
 type User = { id: string; username: string } | null;
