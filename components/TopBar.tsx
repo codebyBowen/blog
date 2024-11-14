@@ -79,45 +79,22 @@ export default function TopBar() {
                       Overview
                     </Link>
                   </li>
-                  <li>
+                  {/* <li>
                     <Link href="/runfair" className="dropdown-link text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">
                       What is Run Fair?
                     </Link>
-                  </li>
+                  </li> */}
                   {/* Add more menu items */}
                 </ul>
               )}
             </li>
 
-            {/* Resources Dropdown */}
-            <li
-              className="navbar-item dropdown"
-              onMouseEnter={() => setShowResourcesMenu(true)}
-              onMouseLeave={() => setShowResourcesMenu(false)}
-            >
-              <button className="navbar-link text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">Resources</button>
-              {showResourcesMenu && (
-                <ul className="dropdown-menu bg-white dark:bg-gray-800">
-                  <li>
-                    <Link href="/news" className="dropdown-link text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">
-                      Blog
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/newsletter" className="dropdown-link text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">
-                      Newsletter
-                    </Link>
-                  </li>
-                  {/* Add more menu items */}
-                </ul>
-              )}
-            </li>
 
-            <li className="navbar-item">
+            {/* <li className="navbar-item">
               <Link href="/" className="navbar-link text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">
                 Pricing
               </Link>
-            </li>
+            </li> */}
             <li className="navbar-item">
               <button
                 onClick={() => setShowPopup(true)}
