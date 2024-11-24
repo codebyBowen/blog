@@ -8,19 +8,32 @@ import { Components } from "react-markdown";
 import Image from "@/components/Image";
 import readingDuration from "reading-duration";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faClock, faThumbsUp as fasThumbsUp, faThumbsDown as fasThumbsDown } from "@fortawesome/free-solid-svg-icons";
-import { faThumbsUp as farThumbsUp, faThumbsDown as farThumbsDown } from "@fortawesome/free-regular-svg-icons";
+import {
+  faClock,
+  faThumbsUp as fasThumbsUp,
+  faThumbsDown as fasThumbsDown,
+} from "@fortawesome/free-solid-svg-icons";
+import {
+  faThumbsUp as farThumbsUp,
+  faThumbsDown as farThumbsDown,
+} from "@fortawesome/free-regular-svg-icons";
 import { CopyBlock, dracula } from "react-code-blocks";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+// import NextImage from 'next/image';
+import SupabaseImage from "@/components/SupebaseImage";
 
 const slugify = (text: string | React.ReactNode): string => {
-  const str = typeof text === 'string' ? text : Array.isArray(text) ? text.join('') : String(text);
-  
+  const str =
+    typeof text === "string"
+      ? text
+      : Array.isArray(text)
+      ? text.join("")
+      : String(text);
+
   return str
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
@@ -39,28 +52,28 @@ export default function ArticleContent({
 
   const [thumbsUp, setThumbsUp] = useState(article.thumbs_up || 0);
   const [thumbsDown, setThumbsDown] = useState(article.thumbs_down || 0);
-  const [userVote, setUserVote] = useState<'up' | 'down' | null>(null);
+  const [userVote, setUserVote] = useState<"up" | "down" | null>(null);
 
   useEffect(() => {
     // 从 localStorage 加载用户投票状态
     const savedVote = localStorage.getItem(`vote-${article.id}`);
     if (savedVote) {
-      setUserVote(savedVote as 'up' | 'down');
+      setUserVote(savedVote as "up" | "down");
     }
   }, [article.id]);
 
-  const handleVote = async (voteType: 'up' | 'down') => {
-    console.log('Vote clicked:', voteType);
-    
+  const handleVote = async (voteType: "up" | "down") => {
+    console.log("Vote clicked:", voteType);
+
     const isRemovingVote = userVote === voteType;
-    const column = voteType === 'up' ? 'thumbup' : 'thumbdown';
+    const column = voteType === "up" ? "thumbup" : "thumbdown";
 
     try {
       const supabase = createClientComponentClient();
-      
+
       // 更新投票状态
       setUserVote(isRemovingVote ? null : voteType);
-      
+
       // 更新 localStorage
       if (isRemovingVote) {
         localStorage.removeItem(`vote-${article.id}`);
@@ -70,28 +83,31 @@ export default function ArticleContent({
 
       // 更新数据库
       const { data: currentArticle, error: fetchError } = await supabase
-        .from('articles')
-        .select('thumbup, thumbdown')
-        .eq('id', article.id)
+        .from("articles")
+        .select("thumbup, thumbdown")
+        .eq("id", article.id)
         .single();
 
       if (fetchError) {
-        console.error('Error fetching article:', fetchError);
+        console.error("Error fetching article:", fetchError);
         return;
       }
 
       const currentValue = (currentArticle as any)[column] || 0;
-      const newValue = Math.max(0, isRemovingVote ? currentValue - 1 : currentValue + 1);
+      const newValue = Math.max(
+        0,
+        isRemovingVote ? currentValue - 1 : currentValue + 1
+      );
 
       const { data: updatedArticle, error } = await supabase
-        .from('articles')
+        .from("articles")
         .update({ [column]: newValue })
-        .eq('id', article.id)
-        .select('thumbup, thumbdown')
+        .eq("id", article.id)
+        .select("thumbup, thumbdown")
         .single();
 
       if (error) {
-        console.error('Error updating vote:', error);
+        console.error("Error updating vote:", error);
         return;
       }
 
@@ -100,9 +116,8 @@ export default function ArticleContent({
         setThumbsUp(updatedArticle.thumbup || 0);
         setThumbsDown(updatedArticle.thumbdown || 0);
       }
-
     } catch (error) {
-      console.error('Error in vote handling:', error);
+      console.error("Error in vote handling:", error);
     }
   };
 
@@ -110,12 +125,12 @@ export default function ArticleContent({
     code({ node, inline, className, children, ...props }) {
       const match = /language-(\w+)/.exec(className || "");
       const language = match ? match[1] : "";
-      
+
       if (!inline && match) {
         return (
           <div className="dark">
             <CopyBlock
-              text={String(children).replace(/\n$/, '')}
+              text={String(children).replace(/\n$/, "")}
               language={language}
               showLineNumbers={true}
               theme={dracula}
@@ -124,10 +139,10 @@ export default function ArticleContent({
           </div>
         );
       }
-      
+
       return (
-        <code 
-          className={`${className} px-1 rounded [&]:dark:text-white [&]:dark:bg-gray-800`} 
+        <code
+          className={`${className} px-1 rounded [&]:dark:text-white [&]:dark:bg-gray-800`}
           {...props}
         >
           {children}
@@ -135,37 +150,38 @@ export default function ArticleContent({
       );
     },
     h1: ({ children }) => (
-      <h1 
-        id={slugify(children)} 
-        className="scroll-mt-16"
-      >
+      <h1 id={slugify(children)} className="scroll-mt-16">
         {children}
       </h1>
     ),
     h2: ({ children }) => (
-      <h2 
-        id={slugify(children)} 
-        className="scroll-mt-16"
-      >
+      <h2 id={slugify(children)} className="scroll-mt-16">
         {children}
       </h2>
     ),
     h3: ({ children }) => (
-      <h3 
-        id={slugify(children)} 
-        className="scroll-mt-16"
-      >
+      <h3 id={slugify(children)} className="scroll-mt-16">
         {children}
       </h3>
     ),
     h4: ({ children }) => (
-      <h4 
-        id={slugify(children)} 
-        className="scroll-mt-16"
-      >
+      <h4 id={slugify(children)} className="scroll-mt-16">
         {children}
       </h4>
     ),
+    img({ src, alt }) {
+      if (!src) return null;
+      return (
+        <div className="my-4">
+          <img
+            src={src}
+            alt={alt || ""}
+            className="max-w-full h-auto rounded-lg mx-auto"
+            loading="lazy"
+          />
+        </div>
+      );
+    },
   };
 
   const readingTime = readingDuration(
@@ -184,33 +200,38 @@ export default function ArticleContent({
         </h1>
         <div className="flex items-center gap-6 text-gray-500">
           <div className="flex items-center">
-            <FontAwesomeIcon icon={faClock} className="mr-2" width={16} height={16} />
+            <FontAwesomeIcon
+              icon={faClock}
+              className="mr-2"
+              width={16}
+              height={16}
+            />
             <span>{readingTime}</span>
           </div>
-          
+
           <div className="flex items-center gap-4">
-            <button 
-              onClick={() => handleVote('up')}
+            <button
+              onClick={() => handleVote("up")}
               className="flex items-center gap-1 hover:text-blue-500 transition-colors"
             >
-              <FontAwesomeIcon 
-                icon={userVote === 'up' ? fasThumbsUp : farThumbsUp} 
-                className={userVote === 'up' ? 'text-blue-500' : ''} 
-                width={16} 
-                height={16} 
+              <FontAwesomeIcon
+                icon={userVote === "up" ? fasThumbsUp : farThumbsUp}
+                className={userVote === "up" ? "text-blue-500" : ""}
+                width={16}
+                height={16}
               />
               <span>{thumbsUp}</span>
             </button>
 
-            <button 
-              onClick={() => handleVote('down')}
+            <button
+              onClick={() => handleVote("down")}
               className="flex items-center gap-1 hover:text-red-500 transition-colors"
             >
-              <FontAwesomeIcon 
-                icon={userVote === 'down' ? fasThumbsDown : farThumbsDown} 
-                className={userVote === 'down' ? 'text-red-500' : ''} 
-                width={16} 
-                height={16} 
+              <FontAwesomeIcon
+                icon={userVote === "down" ? fasThumbsDown : farThumbsDown}
+                className={userVote === "down" ? "text-red-500" : ""}
+                width={16}
+                height={16}
               />
               <span>{thumbsDown}</span>
             </button>
@@ -218,7 +239,8 @@ export default function ArticleContent({
         </div>
       </header>
 
-      <div className="prose prose-lg dark:prose-invert max-w-none mb-4 custom-markdown 
+      <div
+        className="prose prose-lg dark:prose-invert max-w-none mb-4 custom-markdown 
         dark:prose-headings:text-white 
         dark:prose-code:text-white 
         [&_.token]:!dark:text-white

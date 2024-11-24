@@ -10,6 +10,7 @@ import TopBar from "@/components/TopBar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { v4 as uuidv4 } from 'uuid';
 
 // Dynamically import Markdown editor to avoid server-side rendering issues
 const MdEditor = dynamic(() => import('react-markdown-editor-lite'), {
@@ -41,6 +42,27 @@ export default function CreateArticle() {
   const handleEditorChange = ({ html, text }: { html: string, text: string }) => {
     setContent(html);
     setMarkdownContent(text);
+  };
+
+  const handleImageUpload = async (file: File): Promise<string> => {
+    try {
+      const fileName = `${uuidv4()}_${file.name}`;
+      const { data, error } = await supabase.storage
+        .from("images")
+        .upload(`public/${fileName}`, file);
+      
+      if (error) throw error;
+      
+      // Get public URL for the uploaded image
+      const { data: { publicUrl } } = supabase.storage
+        .from("images")
+        .getPublicUrl(data.path);
+      
+      return publicUrl;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -109,19 +131,24 @@ export default function CreateArticle() {
                     style={{ height: '500px' }}
                     renderHTML={(text) => mdParser.render(text)}
                     onChange={handleEditorChange}
+                    onImageUpload={async (file: File) => {
+                      const url = await handleImageUpload(file);
+                      return url;
+                    }}
                     config={{
                       view: {
                         menu: true,
                         md: true,
                         html: false
-                      }
+                      },
+                      imageAccept: '.jpg,.jpeg,.png,.gif'
                     }}
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-2">
-                      Image
+                      Cover Image
                       <input
                         type="file"
                         accept="image/*"
