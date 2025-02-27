@@ -4,8 +4,8 @@ import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-import TopBar from "@/components/TopBar";
-import CreateBtn from "@/components/CreateButton";
+// import TopBar from "@/components/TopBar";
+// import CreateBtn from "@/components/CreateButton";
 import Loading from "@/components/Loading";
 import { stripMarkdown } from '@/utils/textUtils';
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,17 @@ import { Article } from '../types/article';
 import readingDuration from "reading-duration";
 // import NewsletterPopup from "@/components/NewsletterPopup";
 import { useSearchParams, useRouter } from 'next/navigation';
+
+import dynamic from 'next/dynamic';
+
+// 将组件改为动态导入
+const TopBar = dynamic(() => import("@/components/TopBar"), {
+  loading: () => <div className="h-16 bg-background animate-pulse"></div>,
+});
+
+const CreateBtn = dynamic(() => import("@/components/CreateButton"), {
+  ssr: false, // 如果这个组件不需要SSR
+});
 
 export const revalidate = 0;
 

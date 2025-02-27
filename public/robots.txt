@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://thebowvee.com/
+
+# Sitemaps
+Sitemap: https://thebowvee.com/sitemap.xml
