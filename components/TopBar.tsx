@@ -13,9 +13,7 @@ type User = { id: string; username: string } | null;
 export default function TopBar() {
   const [user, setUser] = useState<User>(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showSolutionsMenu, setShowSolutionsMenu] = useState(false);
   const [showPlatformMenu, setShowPlatformMenu] = useState(false);
-  const [showResourcesMenu, setShowResourcesMenu] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 

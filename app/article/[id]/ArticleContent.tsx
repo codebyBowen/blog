@@ -18,13 +18,12 @@ import {
   faThumbsDown as farThumbsDown,
 } from "@fortawesome/free-regular-svg-icons";
 import { CopyBlock, dracula } from "react-code-blocks";
-import { useTheme } from "next-themes";
+// import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 // import NextImage from 'next/image';
-import SupabaseImage from "@/components/SupebaseImage";
 
 const slugify = (text: string | React.ReactNode): string => {
   const str =
@@ -47,8 +46,7 @@ export default function ArticleContent({
   article: Article;
   user: any;
 }) {
-  const { theme } = useTheme();
-  const isDarkMode = theme === "dark";
+  // const { theme } = useTheme();
 
   const [thumbsUp, setThumbsUp] = useState(article.thumbs_up || 0);
   const [thumbsDown, setThumbsDown] = useState(article.thumbs_down || 0);
@@ -122,7 +120,7 @@ export default function ArticleContent({
   };
 
   const customRenderers: Partial<Components> = {
-    code({ node, inline, className, children, ...props }) {
+    code({ inline, className, children, ...props }) {
       const match = /language-(\w+)/.exec(className || "");
       const language = match ? match[1] : "";
 

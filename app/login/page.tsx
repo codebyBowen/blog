@@ -26,21 +26,21 @@ export default function LoginPage() {
     }
   }
 
-  const handleSupabaseLogin = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',  // You can change this to 'github', 'facebook', etc.
-      })
-      if (error) throw error
-      // The redirect is handled by Supabase, so we don't need to use router.push here
-    } catch (error) {
-      if (error instanceof Error) {
-        setError(error.message)
-      } else {
-        setError('An unknown error occurred')
-      }
-    }
-  }
+  // const handleSupabaseLogin = async () => {
+  //   try {
+  //     const { error } = await supabase.auth.signInWithOAuth({
+  //       provider: 'google',  // You can change this to 'github', 'facebook', etc.
+  //     })
+  //     if (error) throw error
+  //     // The redirect is handled by Supabase, so we don't need to use router.push here
+  //   } catch (error) {
+  //     if (error instanceof Error) {
+  //       setError(error.message)
+  //     } else {
+  //       setError('An unknown error occurred')
+  //     }
+  //   }
+  // }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">

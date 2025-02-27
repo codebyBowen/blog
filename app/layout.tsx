@@ -1,9 +1,5 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
-// import { ThemeProvider } from 'next-themes'
-// import ThemeToggle from "../components/ThemeToggle";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
-import { cookies } from "next/headers";
 import Providers from "@/components/NextThemeProvider";
 import Script from 'next/script';
 

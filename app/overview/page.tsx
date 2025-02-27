@@ -19,7 +19,7 @@ const OverviewPage = () => {
             <h2 className="text-3xl font-semibold">Coding Techniques</h2>
           </div>
           <p className="text-lg">
-            Dive into the world of programming. Discover tips, tricks, and best practices for writing clean, efficient code. From beginner tutorials to advanced concepts, I'll share my experiences and insights in various programming languages and frameworks. Whether you're just starting out or looking to refine your skills, you'll find valuable content to enhance your coding journey.
+            Dive into the world of programming. Discover tips, tricks, and best practices for writing clean, efficient code. From beginner tutorials to advanced concepts, I&apos;ll share my experiences and insights in various programming languages and frameworks. Whether you&apos;re just starting out or looking to refine your skills, you&apos;ll find valuable content to enhance your coding journey.
           </p>
         </section>
 
@@ -29,7 +29,7 @@ const OverviewPage = () => {
             <h2 className="text-3xl font-semibold">Personal Thoughts</h2>
           </div>
           <p className="text-lg">
-            Join me as I reflect on the ever-changing landscape of technology, its impact on our lives, and the challenges and joys of being a developer in today's world. Expect honest, thought-provoking content that goes beyond just code. I'll share personal experiences, lessons learned, and insights on balancing work, life, and continuous learning in the fast-paced tech industry.
+            Join me as I reflect on the ever-changing landscape of technology, its impact on our lives, and the challenges and joys of being a developer in today&apos;s world. Expect honest, thought-provoking content that goes beyond just code. I&apos;ll share personal experiences, lessons learned, and insights on balancing work, life, and continuous learning in the fast-paced tech industry.
           </p>
         </section>
 
@@ -39,7 +39,7 @@ const OverviewPage = () => {
             <h2 className="text-3xl font-semibold">Stock Knowledge</h2>
           </div>
           <p className="text-lg">
-            Explore the fascinating realm of stocks and investments. I'll share my learnings, analysis techniques, and thoughts on market trends. From fundamental analysis to technical indicators, we'll delve into various aspects of stock market investing. Disclaimer: This is not financial advice, just my personal journey in understanding the stock market and how it intersects with technology and our daily lives.
+            Explore the fascinating realm of stocks and investments. I&apos;ll share my learnings, analysis techniques, and thoughts on market trends. From fundamental analysis to technical indicators, we&apos;ll delve into various aspects of stock market investing. Disclaimer: This is not financial advice, just my personal journey in understanding the stock market and how it intersects with technology and our daily lives.
           </p>
         </section>
       </div>

@@ -1,8 +1,4 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
-import { Article } from "../../../types/article";
-import Image from "@/components/Image";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import TopBar from "@/components/TopBar";
 import BackToMenuButton from "@/components/BackToMenuButton";
 import ArticleContent from "./ArticleContent";
