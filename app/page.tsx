@@ -25,9 +25,9 @@ const TopBar = dynamic(() => import("@/components/TopBar"), {
   loading: () => <div className="h-16 bg-background animate-pulse"></div>,
 });
 
-const CreateBtn = dynamic(() => import("@/components/CreateButton"), {
-  ssr: false, // 如果这个组件不需要SSR
-});
+// const CreateBtn = dynamic(() => import("@/components/CreateButton"), {
+//   ssr: false, // 如果这个组件不需要SSR
+// });
 
 export const revalidate = 0;
 

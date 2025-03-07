@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { ArrowRight, Code, BookOpen, TrendingUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import Image from "next/image"
+// import Image from "next/image"
 
 const OverviewPage = () => {
   return (
@@ -53,7 +53,7 @@ const OverviewPage = () => {
               <h2 className="text-2xl font-semibold">Personal Thoughts</h2>
             </div>
             <p className="text-muted-foreground">
-              Join me as I reflect on the ever-changing landscape of technology, its impact on our lives, and the challenges and joys of being a developer in today's world.
+              Join me as I reflect on the ever-changing landscape of technology, its impact on our lives, and the challenges and joys of being a developer in todays world.
             </p>
             <Button variant="ghost" asChild className="mt-6 group">
               <Link href="/" className="flex items-center gap-2">
@@ -70,7 +70,7 @@ const OverviewPage = () => {
               <h2 className="text-2xl font-semibold">Stock Knowledge</h2>
             </div>
             <p className="text-muted-foreground">
-              Explore the fascinating realm of stocks and investments. I'll share my learnings, analysis techniques, and thoughts on market trends.
+              Explore the fascinating realm of stocks and investments. I&apos;ll share my learnings, analysis techniques, and thoughts on market trends.
             </p>
             <Button variant="ghost" asChild className="mt-6 group">
               <Link href="/" className="flex items-center gap-2">
