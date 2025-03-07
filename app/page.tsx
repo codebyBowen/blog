@@ -41,7 +41,7 @@ export default function HomePage() {
       <Suspense fallback={<Loading />}>
         <HomePageContent />
       </Suspense>
-      <CreateBtn />
+      {/* <CreateBtn /> */}
     </>
   );
 }
