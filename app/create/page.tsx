@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, ChangeEvent } from "react";
-import { supabase } from "../../utils/supabase";
+import { useState, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from 'next/dynamic';
 import 'react-markdown-editor-lite/lib/index.css';
@@ -10,7 +9,6 @@ import TopBar from "@/components/TopBar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { v4 as uuidv4 } from 'uuid';
 
 // Dynamically import Markdown editor to avoid server-side rendering issues
 const MdEditor = dynamic(() => import('react-markdown-editor-lite'), {
@@ -25,19 +23,8 @@ export default function CreateArticle() {
   const [markdownContent, setMarkdownContent] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [audio, setAudio] = useState<File | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
   const [tag, setTag] = useState<string>("");
   const router = useRouter();
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUserId(user?.id || null);
-    };
-    fetchUser();
-  }, []);
 
   const handleEditorChange = ({ html, text }: { html: string, text: string }) => {
     setContent(html);
@@ -46,19 +33,18 @@ export default function CreateArticle() {
 
   const handleImageUpload = async (file: File): Promise<string> => {
     try {
-      const fileName = `${uuidv4()}_${file.name}`;
-      const { data, error } = await supabase.storage
-        .from("images")
-        .upload(`public/${fileName}`, file);
+      const formData = new FormData();
+      formData.append('file', file);
       
-      if (error) throw error;
+      const response = await fetch('/api/upload-image', {
+        method: 'POST',
+        body: formData
+      });
       
-      // Get public URL for the uploaded image
-      const { data: { publicUrl } } = supabase.storage
-        .from("images")
-        .getPublicUrl(data.path);
+      if (!response.ok) throw new Error('Upload failed');
       
-      return publicUrl;
+      const { url } = await response.json();
+      return url;
     } catch (error) {
       console.error("Error uploading image:", error);
       throw error;
@@ -68,39 +54,26 @@ export default function CreateArticle() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      if (!userId) throw new Error("User not authenticated");
       if (!tag) throw new Error("Please select a tag");
 
-      let imagePath = null;
-      let audioPath = null;
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('content', content);
+      formData.append('markdown_content', markdownContent);
+      formData.append('tag', tag);
+      if (image) formData.append('image', image);
+      if (audio) formData.append('audio', audio);
 
-      if (image) {
-        const { data, error } = await supabase.storage
-          .from("images")
-          .upload(`public/${Date.now()}_${image.name}`, image);
-        if (error) throw error;
-        imagePath = data.path;
-      }
-
-      if (audio) {
-        const { data, error } = await supabase.storage
-          .from("audio")
-          .upload(`public/${Date.now()}_${audio.name}`, audio);
-        if (error) throw error;
-        audioPath = data.path;
-      }
-
-      const { error } = await supabase.from("articles").insert({
-        title,
-        content,
-        markdown_content: markdownContent,
-        image_url: imagePath,
-        audio_url: audioPath,
-        user_id: userId,
-        tag: tag,
+      const response = await fetch('/api/articles', {
+        method: 'POST',
+        body: formData
       });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message);
+      }
+
       router.push("/");
     } catch (error) {
       console.error("Error creating article:", error);

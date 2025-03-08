@@ -3,7 +3,6 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 // import TopBar from "@/components/TopBar";
 // import CreateBtn from "@/components/CreateButton";
 import Loading from "@/components/Loading";
@@ -49,8 +48,10 @@ export default function HomePage() {
 function HomePageContent() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [popularArticles, setPopularArticles] = useState<Article[]>([]);
-  const [visibleArticles, setVisibleArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -73,52 +74,53 @@ function HomePageContent() {
   };
 
   useEffect(() => {
-    const fetchArticles = async () => {
-      const supabase = createClientComponentClient();
-      const { data } = await supabase
-        .from("articles")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (data) {
-        setArticles(data);
-        setVisibleArticles(data.slice(0, 5));
+    const fetchInitialArticles = async () => {
+      try {
+        setLoading(true);
+        // 分类改变时重置状态
+        setArticles([]);
+        setCurrentPage(1);
+        setHasMore(true);
         
-        const sortedByViews = [...data].sort((a, b) => b.views - a.views);
-        setPopularArticles(sortedByViews);
+        const url = `/api/articles?page=1&pageSize=5${selectedCategory ? `&category=${encodeURIComponent(selectedCategory)}` : ''}`;
+        const response = await fetch(url);
+        const { data, metadata } = await response.json();
+        
+        setArticles(data);
+        setHasMore(metadata.currentPage < metadata.totalPages);
+
+        // 获取热门文章
+        const popularResponse = await fetch('/api/articles?page=1&pageSize=3&sort=views');
+        const { data: popularData } = await popularResponse.json();
+        setPopularArticles(popularData);
+      } catch (error) {
+        console.error('Error fetching articles:', error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
-    fetchArticles();
-  }, []);
+    fetchInitialArticles();
+  }, [selectedCategory]);
 
-  // 在 useEffect 之后添加筛选函数
-  useEffect(() => {
-    if (selectedCategory) {
-      const filtered = articles.filter(article => article.tag?.includes(selectedCategory));
-      setVisibleArticles(filtered.slice(0, 5));
-    } else {
-      setVisibleArticles(articles.slice(0, 5));
+  const loadMorePosts = async () => {
+    try {
+      setLoadingMore(true);
+      const nextPage = currentPage + 1;
+      
+      const url = `/api/articles?page=${nextPage}&pageSize=5${selectedCategory ? `&category=${encodeURIComponent(selectedCategory)}` : ''}`;
+      const response = await fetch(url);
+      const { data, metadata } = await response.json();
+      
+      // 追加新文章到现有列表
+      setArticles(prevArticles => [...prevArticles, ...data]);
+      setCurrentPage(nextPage);
+      setHasMore(metadata.currentPage < metadata.totalPages);
+    } catch (error) {
+      console.error('Error loading more posts:', error);
+    } finally {
+      setLoadingMore(false);
     }
-  }, [selectedCategory, articles]);
-
-  const loadMorePosts = () => {
-    const currentLength = visibleArticles.length;
-    let nextArticles;
-    
-    if (selectedCategory) {
-      // 如果有选中分类，从已过滤的文章中加载更多
-      const filteredArticles = articles.filter(article => 
-        article.tag?.toLowerCase() === selectedCategory.toLowerCase()
-      );
-      nextArticles = filteredArticles.slice(currentLength, currentLength + 5);
-    } else {
-      // 如果没有选中分类，从所有文章中加载更多
-      nextArticles = articles.slice(currentLength, currentLength + 5);
-    }
-    
-    setVisibleArticles([...visibleArticles, ...nextArticles]);
   };
 
   if (loading) {
@@ -134,14 +136,14 @@ function HomePageContent() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            {visibleArticles.map((article, index) => {
+            {articles.map((article, index) => {
               const readingTime = readingDuration(article.content, {
                 wordsPerMinute: 200,
                 emoji: false,
               });
 
               return (
-                <Card key={article.id} className={index === 0 ? "mb-8" : "mb-6"}>
+                <Card key={article.id} className={`${index === 0 ? "mb-8" : "mb-6"} dark:border-white`}>
                   {index === 0 && article.image && (
                     <Image src={article.image} height={400} width={800} alt="Featured blog post" className="w-full h-64 object-cover" />
                   )}
@@ -165,11 +167,15 @@ function HomePageContent() {
                 </Card>
               );
             })}
-            {visibleArticles.length < (selectedCategory 
-              ? articles.filter(article => article.tag?.toLowerCase() === selectedCategory.toLowerCase()).length 
-              : articles.length) && (
+            {hasMore && (
               <div className="mt-8 flex justify-center">
-                <Button variant="outline" onClick={loadMorePosts}>Load More Posts</Button>
+                <Button 
+                  variant="outline" 
+                  onClick={loadMorePosts}
+                  disabled={loadingMore}
+                >
+                  {loadingMore ? 'Loading...' : 'Load More Posts'}
+                </Button>
               </div>
             )}
           </div>

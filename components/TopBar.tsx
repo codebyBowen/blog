@@ -133,9 +133,9 @@ export default function TopBar() {
               </div>
             ) : (
               <div className="auth-buttons">
-                <Link href="/contact" className="btn btn-primary text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">
+                {/* <Link href="/contact" className="btn btn-primary text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">
                   Contact Us
-                </Link>
+                </Link> */}
                 <Link href="/login" className="btn btn-secondary text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">
                   Login
                 </Link>
