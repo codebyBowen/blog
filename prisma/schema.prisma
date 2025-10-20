@@ -1,0 +1,143 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 三级权限枚举
+enum Role {
+  ADMIN   // 管理员：完全控制权限
+  EDITOR  // 编辑者：可以创建和编辑内容
+  VIEWER  // 查看者：只能查看内容
+}
+
+// 文章状态
+enum ArticleStatus {
+  DRAFT      // 草稿
+  PUBLISHED  // 已发布
+  ARCHIVED   // 已归档
+}
+
+// 用户模型
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String?
+  password      String
+  role          Role      @default(VIEWER)
+  avatar        String?
+  bio           String?
+
+  // 关联
+  articles      Article[]
+  comments      Comment[]
+
+  // 时间戳
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([email])
+  @@index([role])
+}
+
+// 文章模型
+model Article {
+  id            String        @id @default(uuid())
+  title         String
+  slug          String        @unique
+  content       String        @db.Text
+  excerpt       String?
+  coverImage    String?
+  status        ArticleStatus @default(DRAFT)
+
+  // 作者关联
+  authorId      String
+  author        User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  // 分类和标签
+  categories    Category[]
+  tags          Tag[]
+
+  // 评论
+  comments      Comment[]
+
+  // SEO 和元数据
+  metaTitle     String?
+  metaDescription String?
+  keywords      String[]
+
+  // 统计
+  views         Int           @default(0)
+  likes         Int           @default(0)
+
+  // 时间戳
+  publishedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([slug])
+  @@index([authorId])
+  @@index([status])
+  @@index([publishedAt])
+}
+
+// 分类模型
+model Category {
+  id            String    @id @default(uuid())
+  name          String    @unique
+  slug          String    @unique
+  description   String?
+
+  // 关联
+  articles      Article[]
+
+  // 时间戳
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([slug])
+}
+
+// 标签模型
+model Tag {
+  id            String    @id @default(uuid())
+  name          String    @unique
+  slug          String    @unique
+
+  // 关联
+  articles      Article[]
+
+  // 时间戳
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([slug])
+}
+
+// 评论模型
+model Comment {
+  id            String    @id @default(uuid())
+  content       String    @db.Text
+
+  // 作者关联
+  authorId      String
+  author        User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  // 文章关联
+  articleId     String
+  article       Article   @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  // 时间戳
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([authorId])
+  @@index([articleId])
+  @@index([createdAt])
+}
