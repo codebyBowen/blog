@@ -73,6 +73,25 @@ export default async function ArticlePage({
   if (!article)
     return <div className="container mx-auto p-4">Article not found</div>;
 
+  // Check visibility permissions
+  if (article.visibility === 'private') {
+    // Private articles can only be viewed by the author
+    if (!user || user.id !== article.user_id) {
+      return (
+        <div className="container mx-auto p-4">
+          <TopBar />
+          <div className="max-w-2xl mx-auto mt-10 text-center">
+            <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              This article is private and can only be viewed by its author.
+            </p>
+          </div>
+        </div>
+      );
+    }
+  }
+  // Note: 'unlisted' and 'public' articles are accessible to everyone
+
   const articleId = parseInt(params.id);
 
   // 添加 JSON-LD 结构化数据

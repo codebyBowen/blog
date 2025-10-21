@@ -5,13 +5,28 @@ import { Article } from '@/types/article'
 
 export const getRecentArticles = cache(async (currentArticleId: string) => {
   const supabase = createServerComponentClient({ cookies })
-  
-  const { data: articles, error } = await supabase
+
+  // Get current user session
+  const { data: { session } } = await supabase.auth.getSession()
+  const userId = session?.user?.id
+
+  let query = supabase
     .from('articles')
     .select('id, title, created_at')
     .neq('id', currentArticleId)
     .order('created_at', { ascending: false })
     .limit(5)
+
+  // Apply visibility filter
+  // Show: public articles + user's own private articles
+  // Hide: unlisted articles (they're only accessible via direct link)
+  if (userId) {
+    query = query.or(`visibility.eq.public,and(visibility.eq.private,user_id.eq.${userId})`)
+  } else {
+    query = query.eq('visibility', 'public')
+  }
+
+  const { data: articles, error } = await query
 
   if (error) {
     console.error('Error fetching recent articles:', error)

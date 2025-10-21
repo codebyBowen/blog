@@ -1,3 +1,5 @@
+export type ArticleVisibility = 'public' | 'private' | 'unlisted';
+
 export interface Article {
   id: number;
   title: string;
@@ -11,4 +13,6 @@ export interface Article {
   thumbs_up?: number;
   thumbs_down?: number;
   tag?: string;
+  visibility: ArticleVisibility;
+  user_id?: string;
 }
