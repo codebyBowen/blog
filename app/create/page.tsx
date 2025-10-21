@@ -9,6 +9,7 @@ import TopBar from "@/components/TopBar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArticleVisibility } from "@/types/article";
 
 // Dynamically import Markdown editor to avoid server-side rendering issues
 const MdEditor = dynamic(() => import('react-markdown-editor-lite'), {
@@ -24,6 +25,7 @@ export default function CreateArticle() {
   const [image, setImage] = useState<File | null>(null);
   const [audio, setAudio] = useState<File | null>(null);
   const [tag, setTag] = useState<string>("");
+  const [visibility, setVisibility] = useState<ArticleVisibility>("public");
   const router = useRouter();
 
   const handleEditorChange = ({ html, text }: { html: string, text: string }) => {
@@ -61,6 +63,7 @@ export default function CreateArticle() {
       formData.append('content', content);
       formData.append('markdown_content', markdownContent);
       formData.append('tag', tag);
+      formData.append('visibility', visibility);
       if (image) formData.append('image', image);
       if (audio) formData.append('audio', audio);
 
@@ -118,7 +121,7 @@ export default function CreateArticle() {
                     }}
                   />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-2">
                       Cover Image
@@ -165,6 +168,21 @@ export default function CreateArticle() {
                           <SelectItem value="Finance">Finance</SelectItem>
                           <SelectItem value="SEO">SEO</SelectItem>
                           <SelectItem value="Life Experience">Life Experience</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </label>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Visibility
+                      <Select onValueChange={(value) => setVisibility(value as ArticleVisibility)} defaultValue="public">
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select visibility" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="public">Public</SelectItem>
+                          <SelectItem value="unlisted">Unlisted</SelectItem>
+                          <SelectItem value="private">Private</SelectItem>
                         </SelectContent>
                       </Select>
                     </label>

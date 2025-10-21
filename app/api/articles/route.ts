@@ -11,6 +11,7 @@ export async function POST(request: Request) {
     const content = formData.get('content') as string
     const markdownContent = formData.get('markdown_content') as string
     const tag = formData.get('tag') as string
+    const visibility = (formData.get('visibility') as string) || 'public'
     const image = formData.get('image') as File
     const audio = formData.get('audio') as File
 
@@ -50,7 +51,8 @@ export async function POST(request: Request) {
         image_url: imagePath,
         audio_url: audioPath,
         user_id: session.user.id,
-        tag
+        tag,
+        visibility
       })
       .select()
       .single()
@@ -69,27 +71,40 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
     const supabase = createRouteHandlerClient({ cookies })
-    
+
     try {
       const { searchParams } = new URL(request.url)
       const category = searchParams.get('category')
       const page = parseInt(searchParams.get('page') || '1')
       const pageSize = parseInt(searchParams.get('pageSize') || '5')
-      
+
+      // Get current user session
+      const { data: { session } } = await supabase.auth.getSession()
+      const userId = session?.user?.id
+
       // Calculate offset
       const from = (page - 1) * pageSize
       const to = from + pageSize - 1
-      
+
       let query = supabase
         .from("articles")
         .select("*", { count: 'exact' })
         .order("created_at", { ascending: false })
         .range(from, to)
-      
+
+      // Apply visibility filter
+      // Show: public articles + user's own private articles
+      // Hide: unlisted articles (they're only accessible via direct link)
+      if (userId) {
+        query = query.or(`visibility.eq.public,and(visibility.eq.private,user_id.eq.${userId})`)
+      } else {
+        query = query.eq('visibility', 'public')
+      }
+
       if (category) {
         query = query.eq('tag', category)
       }
-      
+
       const { data, error, count } = await query
   
       if (error) {
