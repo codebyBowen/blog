@@ -18,6 +18,7 @@ export default function TopBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
+    // Initial user fetch
     const fetchUser = async () => {
       const {
         data: { user },
@@ -30,6 +31,25 @@ export default function TopBar() {
       }
     };
     fetchUser();
+
+    // Listen for auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          username: session.user.user_metadata.username || "User",
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleSignOut = async () => {
