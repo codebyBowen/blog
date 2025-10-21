@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { supabase } from "../utils/supabase";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import avatar from "../public/avatar/user_default_1.jpeg";
 import logo from "../public/thebowveelogo.png";
 import NewsletterPopup from "@/components/NewsletterPopup";
@@ -16,8 +16,10 @@ export default function TopBar() {
   const [showPlatformMenu, setShowPlatformMenu] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const supabase = createClientComponentClient();
 
   useEffect(() => {
+    // Initial user fetch
     const fetchUser = async () => {
       const {
         data: { user },
@@ -30,7 +32,26 @@ export default function TopBar() {
       }
     };
     fetchUser();
-  }, []);
+
+    // Listen for auth state changes (login/logout)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          username: session.user.user_metadata.username || "User",
+        });
+      } else {
+        setUser(null);
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
