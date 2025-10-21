@@ -20,13 +20,15 @@ export default function LoginPage() {
         },
         body: JSON.stringify({ email, password }),
       })
-      
+
       const data = await response.json()
-      
+
       if (!response.ok) {
         throw new Error(data.error)
       }
-      
+
+      // Refresh the router to update server components and reload auth state
+      router.refresh()
       router.push('/')
     } catch (error) {
       if (error instanceof Error) {
