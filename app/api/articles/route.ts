@@ -21,23 +21,39 @@ export async function POST(request: Request) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // 验证必填字段
+    if (!title || !content || !markdownContent) {
+      return Response.json(
+        { error: 'Title and content are required' },
+        { status: 400 }
+      )
+    }
+
     // 处理文件上传
     let imagePath = null
     let audioPath = null
 
-    if (image) {
+    // 检查图片文件是否有效（非空文件）
+    if (image && image.size > 0 && image.name) {
       const { data, error } = await supabase.storage
         .from("images")
         .upload(`public/${Date.now()}_${image.name}`, image)
-      if (error) throw error
+      if (error) {
+        console.error('Image upload error:', error)
+        throw new Error(`Image upload failed: ${error.message}`)
+      }
       imagePath = data.path
     }
 
-    if (audio) {
+    // 检查音频文件是否有效（非空文件）
+    if (audio && audio.size > 0 && audio.name) {
       const { data, error } = await supabase.storage
         .from("audio")
         .upload(`public/${Date.now()}_${audio.name}`, audio)
-      if (error) throw error
+      if (error) {
+        console.error('Audio upload error:', error)
+        throw new Error(`Audio upload failed: ${error.message}`)
+      }
       audioPath = data.path
     }
 
@@ -57,13 +73,17 @@ export async function POST(request: Request) {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Database insert error:', error)
+      throw new Error(`Failed to create article: ${error.message}`)
+    }
 
     return Response.json({ data })
   } catch (error) {
     console.error('API Error:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Internal Server Error'
     return Response.json(
-      { error: 'Internal Server Error' }, 
+      { error: errorMessage },
       { status: 500 }
     )
   }
