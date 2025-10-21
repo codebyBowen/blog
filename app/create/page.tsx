@@ -26,6 +26,7 @@ export default function CreateArticle() {
   const [audio, setAudio] = useState<File | null>(null);
   const [tag, setTag] = useState<string>("");
   const [visibility, setVisibility] = useState<ArticleVisibility>("public");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
   const handleEditorChange = ({ html, text }: { html: string, text: string }) => {
@@ -55,7 +56,15 @@ export default function CreateArticle() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isSubmitting) return; // 防止重复提交
+
     try {
+      setIsSubmitting(true);
+
+      // 验证必填字段
+      if (!title.trim()) throw new Error("Please enter a title");
+      if (!content.trim()) throw new Error("Please enter content");
       if (!tag) throw new Error("Please select a tag");
 
       const formData = new FormData();
@@ -73,14 +82,17 @@ export default function CreateArticle() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message);
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create article');
       }
 
       router.push("/");
     } catch (error) {
       console.error("Error creating article:", error);
-      alert("Error creating article. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : "Error creating article. Please try again.";
+      alert(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -189,8 +201,8 @@ export default function CreateArticle() {
                   </div>
                 </div>
                 <div className="flex justify-end">
-                  <Button type="submit" size="lg">
-                    Publish
+                  <Button type="submit" size="lg" disabled={isSubmitting}>
+                    {isSubmitting ? "Publishing..." : "Publish"}
                   </Button>
                 </div>
               </form>
