@@ -60,7 +60,7 @@ export default function TopBar() {
 
   return (
     <>
-      <nav className="navbar bg-white dark:bg-gray-900">
+      <nav className="navbar bg-white dark:bg-black">
         <div className="navbar-container">
           {/* Logo */}
           <Link href="/" className="navbar-logo">
@@ -92,7 +92,7 @@ export default function TopBar() {
             >
               <button className="navbar-link text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">Platform</button>
               {showPlatformMenu && (
-                <ul className="dropdown-menu bg-white dark:bg-gray-800">
+                <ul className="dropdown-menu bg-white dark:bg-[#16181C]">
                   <li>
                     <Link href="/overview" className="dropdown-link text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">
                       Overview
@@ -142,7 +142,7 @@ export default function TopBar() {
                   <span>{user.username}</span>
                 </button>
                 {showUserMenu && (
-                  <div className="user-dropdown bg-white dark:bg-gray-800">
+                  <div className="user-dropdown bg-white dark:bg-[#16181C]">
                     <Link href="/profile" className="dropdown-item text-black dark:text-white hover:text-yellow-400 dark:hover:text-yellow-400">
                       Edit Profile
                     </Link>

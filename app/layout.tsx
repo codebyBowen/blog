@@ -62,7 +62,7 @@ export default async function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body className={`${inter.className} bg-white dark:bg-gray-900 min-h-screen`}>
+      <body className={`${inter.className} bg-white dark:bg-black min-h-screen`}>
         <Providers>{children}</Providers>
       </body>
     </html>
