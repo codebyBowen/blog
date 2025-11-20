@@ -25,23 +25,24 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   const supabase = createClientComponentClient();
   const { data: article } = await supabase
     .from("articles")
-    .select("title, description, image, updated_at")
+    .select("title, content, image")
     .eq("id", params.id)
     .single();
 
   if (!article) return {};
 
   const canonicalUrl = `https://thebowvee.com/article/${params.id}/${createSlug(article.title)}`;
+  const description = article.content?.substring(0, 160).replace(/[#*`]/g, '') || article.title;
 
   return {
     title: article.title,
-    description: article.description,
+    description: description,
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
       title: article.title,
-      description: article.description,
+      description: description,
       url: canonicalUrl,
       type: 'article',
       images: [
@@ -56,7 +57,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
     twitter: {
       card: 'summary_large_image',
       title: article.title,
-      description: article.description,
+      description: description,
       images: [article.image || '/default-og-image.jpg'],
     },
   };
@@ -99,10 +100,10 @@ export default async function ArticlePage({
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
     headline: article.title,
-    description: article.description || article.content.substring(0, 160),
+    description: article.content.substring(0, 160).replace(/[#*`]/g, ''),
     image: article.image ? [article.image] : [],
     datePublished: article.created_at,
-    dateModified: article.updated_at || article.created_at,
+    dateModified: article.created_at,
     author: {
       '@type': 'Person',
       name: 'thebowvee',
@@ -120,8 +121,8 @@ export default async function ArticlePage({
       '@type': 'WebPage',
       '@id': `https://thebowvee.com/article/${params.id}/${createSlug(article.title)}`,
     },
-    articleSection: article.category || 'Blog',
-    keywords: article.tags?.join(', ') || '',
+    articleSection: article.tag || 'Blog',
+    keywords: article.tag || '',
     wordCount: article.content.split(/\s+/).length,
     inLanguage: 'en-US',
   };
