@@ -1,0 +1,26 @@
+{
+  "name": "thebowvee - AI Technology & Financial Market Insights",
+  "short_name": "thebowvee",
+  "description": "Expert insights on AI technology, financial markets, and investment strategies",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/thebowveelogo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/thebowveelogo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["news", "education", "finance"],
+  "lang": "en-US"
+}

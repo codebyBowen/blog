@@ -34,8 +34,49 @@ export const revalidate = 0;
 type Category = 'Web Development' | 'Finance' | 'SEO' | 'Life Experience';
 
 export default function HomePage() {
+  // 添加网站级别的JSON-LD结构化数据
+  const websiteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'thebowvee',
+    url: 'https://thebowvee.com',
+    description: 'Expert insights on AI technology, financial markets, and investment strategies',
+    publisher: {
+      '@type': 'Organization',
+      name: 'thebowvee',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://thebowvee.com/thebowveelogo.png',
+      },
+    },
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: 'https://thebowvee.com/?search={search_term_string}',
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
+  const organizationJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'thebowvee',
+    url: 'https://thebowvee.com',
+    logo: 'https://thebowvee.com/thebowveelogo.png',
+    sameAs: [
+      'https://twitter.com/thebowvee',
+    ],
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
       <TopBar />
       <Suspense fallback={<Loading />}>
         <HomePageContent />
