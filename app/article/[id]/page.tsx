@@ -97,16 +97,33 @@ export default async function ArticlePage({
   // 添加 JSON-LD 结构化数据
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'Article',
+    '@type': 'BlogPosting',
     headline: article.title,
-    description: article.content.substring(0, 160),
-    image: article.image,
+    description: article.description || article.content.substring(0, 160),
+    image: article.image ? [article.image] : [],
     datePublished: article.created_at,
-    // dateModified: article.updated_at,
+    dateModified: article.updated_at || article.created_at,
     author: {
       '@type': 'Person',
-      name: 'Author Name',
+      name: 'thebowvee',
+      url: 'https://thebowvee.com',
     },
+    publisher: {
+      '@type': 'Organization',
+      name: 'thebowvee',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://thebowvee.com/thebowveelogo.png',
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://thebowvee.com/article/${params.id}/${createSlug(article.title)}`,
+    },
+    articleSection: article.category || 'Blog',
+    keywords: article.tags?.join(', ') || '',
+    wordCount: article.content.split(/\s+/).length,
+    inLanguage: 'en-US',
   };
 
   return (

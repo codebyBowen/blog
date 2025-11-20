@@ -25,7 +25,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/api/', '/admin/']
       }
     ],
-    sitemap: 'https://thebowvee.com/sitemap.ts',
+    sitemap: 'https://thebowvee.com/sitemap.xml',
     host: 'https://thebowvee.com'
   }
 }

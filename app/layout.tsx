@@ -6,31 +6,54 @@ import Script from 'next/script';
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "thebowvee",
+  metadataBase: new URL('https://thebowvee.com'),
+  title: {
+    default: "thebowvee - AI Technology & Financial Market Insights",
+    template: "%s | thebowvee"
+  },
   description: "Explore expert insights on AI technology, financial markets, and investment strategies. Stay informed with in-depth analysis, trading tips, and the latest developments in artificial intelligence.",
-  keywords: "AI technology, financial markets, trading strategies, investment analysis, artificial intelligence, market trends",
+  keywords: ["AI technology", "financial markets", "trading strategies", "investment analysis", "artificial intelligence", "market trends", "SEO", "web development", "life experience"],
+  authors: [{ name: "thebowvee" }],
+  creator: "thebowvee",
+  publisher: "thebowvee",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   openGraph: {
-    title: 'thebowvee',
+    title: 'thebowvee - AI Technology & Financial Market Insights',
     description: 'Your trusted source for AI technology and financial market insights. Discover expert analysis on trading strategies, market trends, and artificial intelligence innovations.',
     url: 'https://thebowvee.com',
     siteName: 'thebowvee',
     images: [
       {
         url: '/thebowveelogo.png',
-        width: 800,
-        height: 600,
+        width: 1200,
+        height: 630,
+        alt: 'thebowvee - AI & Finance Blog',
       },
     ],
     locale: 'en-US',
     type: 'website',
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'thebowvee - AI Technology & Financial Market Insights',
+    description: 'Your trusted source for AI technology and financial market insights. Discover expert analysis on trading strategies, market trends, and artificial intelligence innovations.',
+    images: ['/thebowveelogo.png'],
+    creator: '@thebowvee',
+  },
   icons: {
-    icon: '/thebowveelogo.png', // 使用同一张图片作为网站图标
+    icon: '/thebowveelogo.png',
+    shortcut: '/thebowveelogo.png',
     apple: '/thebowveelogo.png',
   },
+  manifest: '/manifest.json',
   robots: {
     index: true,
     follow: true,
+    nocache: true,
     googleBot: {
       index: true,
       follow: true,
@@ -38,6 +61,12 @@ export const metadata = {
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
+  },
+  alternates: {
+    canonical: 'https://thebowvee.com',
+  },
+  verification: {
+    google: 'your-google-verification-code',
   },
 };
 
