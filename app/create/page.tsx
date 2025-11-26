@@ -76,17 +76,41 @@ export default function CreateArticle() {
       if (image) formData.append('image', image);
       if (audio) formData.append('audio', audio);
 
-      const response = await fetch('/api/articles', {
-        method: 'POST',
-        body: formData
-      });
+      // 创建超时控制器
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60秒超时
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create article');
+      try {
+        const response = await fetch('/api/articles', {
+          method: 'POST',
+          body: formData,
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          // 检查响应是否是JSON
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to create article');
+          } else {
+            // 服务器返回了HTML错误页面
+            const text = await response.text();
+            console.error('Server error response:', text);
+            throw new Error('Server error occurred. Please check the console for details.');
+          }
+        }
+
+        router.push("/");
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+          throw new Error('Request timed out. Please try again with smaller files or check your connection.');
+        }
+        throw fetchError;
       }
-
-      router.push("/");
     } catch (error) {
       console.error("Error creating article:", error);
       const errorMessage = error instanceof Error ? error.message : "Error creating article. Please try again.";

@@ -2,6 +2,10 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
+// API路由配置
+export const runtime = 'nodejs' // 使用Node.js运行时
+export const maxDuration = 60 // 最长执行时间60秒
+
 export async function POST(request: Request) {
   const supabase = createRouteHandlerClient({ cookies })
   
