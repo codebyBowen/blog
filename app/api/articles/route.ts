@@ -57,10 +57,9 @@ export async function POST(request: Request) {
       audioPath = data.path
     }
 
-    // 创建文章
-    const { data, error } = await supabase
-      .from('articles')
-      .insert({
+    // 创建文章 - 带重试机制处理序列冲突
+    const insertArticle = async (explicitId?: number) => {
+      const insertData: Record<string, unknown> = {
         title,
         content,
         markdown_content: markdownContent,
@@ -69,9 +68,38 @@ export async function POST(request: Request) {
         user_id: session.user.id,
         tag,
         visibility
-      })
-      .select()
-      .single()
+      }
+
+      if (explicitId !== undefined) {
+        insertData.id = explicitId
+      }
+
+      return supabase
+        .from('articles')
+        .insert(insertData)
+        .select()
+        .single()
+    }
+
+    // 首次尝试（使用数据库序列自动生成 ID）
+    let { data, error } = await insertArticle()
+
+    // 如果遇到 duplicate key 错误，查询最大 ID 并重试
+    if (error && error.message.includes('duplicate key')) {
+      console.warn('Duplicate key detected, fetching max ID and retrying...')
+
+      const { data: maxIdData } = await supabase
+        .from('articles')
+        .select('id')
+        .order('id', { ascending: false })
+        .limit(1)
+        .single()
+
+      const newId = (maxIdData?.id || 0) + 1
+      const retryResult = await insertArticle(newId)
+      data = retryResult.data
+      error = retryResult.error
+    }
 
     if (error) {
       console.error('Database insert error:', error)
