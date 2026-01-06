@@ -93,6 +93,8 @@ function HomePageContent() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchLoading, setSearchLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -112,9 +114,42 @@ function HomePageContent() {
       setSelectedCategory(category);
       router.push(`?category=${category}`);
     }
+    // 清除搜索
+    setSearchQuery('');
   };
 
+  // 防抖搜索
   useEffect(() => {
+    if (!searchQuery.trim()) {
+      return;
+    }
+
+    const debounceTimer = setTimeout(async () => {
+      setSearchLoading(true);
+      try {
+        const url = `/api/articles?page=1&pageSize=20&search=${encodeURIComponent(searchQuery)}`;
+        const response = await fetch(url);
+        const { data, metadata } = await response.json();
+
+        setArticles(data || []);
+        setCurrentPage(1);
+        setHasMore(metadata.currentPage < metadata.totalPages);
+      } catch (error) {
+        console.error('Error searching articles:', error);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    // 如果有搜索关键词，不执行初始加载
+    if (searchQuery.trim()) {
+      return;
+    }
+
     const fetchInitialArticles = async () => {
       try {
         setLoading(true);
@@ -122,11 +157,11 @@ function HomePageContent() {
         setArticles([]);
         setCurrentPage(1);
         setHasMore(true);
-        
+
         const url = `/api/articles?page=1&pageSize=5${selectedCategory ? `&category=${encodeURIComponent(selectedCategory)}` : ''}`;
         const response = await fetch(url);
         const { data, metadata } = await response.json();
-        
+
         setArticles(data);
         setHasMore(metadata.currentPage < metadata.totalPages);
 
@@ -142,7 +177,7 @@ function HomePageContent() {
     };
 
     fetchInitialArticles();
-  }, [selectedCategory]);
+  }, [selectedCategory, searchQuery]);
 
   const loadMorePosts = async () => {
     try {
@@ -222,6 +257,39 @@ function HomePageContent() {
           </div>
 
           <div className="space-y-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Search</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
+                  <Input
+                    type="text"
+                    placeholder="Search articles..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      // 清除分类选择
+                      if (e.target.value.trim() && selectedCategory) {
+                        setSelectedCategory(null);
+                        router.push('/');
+                      }
+                    }}
+                    className="pl-9"
+                  />
+                </div>
+                {searchLoading && (
+                  <p className="text-sm text-muted-foreground mt-2">Searching...</p>
+                )}
+                {searchQuery && !searchLoading && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Found {articles.length} result{articles.length !== 1 ? 's' : ''}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle>Categories</CardTitle>

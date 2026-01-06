@@ -123,6 +123,7 @@ export async function GET(request: Request) {
     try {
       const { searchParams } = new URL(request.url)
       const category = searchParams.get('category')
+      const search = searchParams.get('search')
       const page = parseInt(searchParams.get('page') || '1')
       const pageSize = parseInt(searchParams.get('pageSize') || '5')
 
@@ -151,6 +152,11 @@ export async function GET(request: Request) {
 
       if (category) {
         query = query.eq('tag', category)
+      }
+
+      // Apply search filter (fuzzy search on title and content)
+      if (search) {
+        query = query.or(`title.ilike.%${search}%,content.ilike.%${search}%`)
       }
 
       const { data, error, count } = await query
