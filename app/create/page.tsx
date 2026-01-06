@@ -82,8 +82,15 @@ export default function CreateArticle() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create article');
+        let errorMessage = 'Failed to create article';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          // Response is not JSON (e.g., HTML error page)
+          errorMessage = response.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
 
       router.push("/");

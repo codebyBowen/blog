@@ -3,9 +3,8 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
-  const supabase = createRouteHandlerClient({ cookies })
-  
   try {
+    const supabase = createRouteHandlerClient({ cookies })
     const formData = await request.formData()
     const title = formData.get('title') as string
     const content = formData.get('content') as string
