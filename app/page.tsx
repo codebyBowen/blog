@@ -89,12 +89,14 @@ export default function HomePage() {
 function HomePageContent() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [popularArticles, setPopularArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // 仅用于初始加载
+  const [articlesLoading, setArticlesLoading] = useState(false); // 文章列表局部 loading
   const [loadingMore, setLoadingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true); // 标记是否为初始加载
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -150,11 +152,15 @@ function HomePageContent() {
       return;
     }
 
-    const fetchInitialArticles = async () => {
+    const fetchArticles = async () => {
       try {
-        setLoading(true);
-        // 分类改变时重置状态
-        setArticles([]);
+        // 初始加载使用全屏 loading，后续切换分类只 loading 文章列表
+        if (isInitialLoad) {
+          setLoading(true);
+        } else {
+          setArticlesLoading(true);
+        }
+
         setCurrentPage(1);
         setHasMore(true);
 
@@ -165,19 +171,23 @@ function HomePageContent() {
         setArticles(data);
         setHasMore(metadata.currentPage < metadata.totalPages);
 
-        // 获取热门文章
-        const popularResponse = await fetch('/api/articles?page=1&pageSize=3&sort=views');
-        const { data: popularData } = await popularResponse.json();
-        setPopularArticles(popularData);
+        // 只在初始加载时获取热门文章
+        if (isInitialLoad) {
+          const popularResponse = await fetch('/api/articles?page=1&pageSize=3&sort=views');
+          const { data: popularData } = await popularResponse.json();
+          setPopularArticles(popularData);
+          setIsInitialLoad(false);
+        }
       } catch (error) {
         console.error('Error fetching articles:', error);
       } finally {
         setLoading(false);
+        setArticlesLoading(false);
       }
     };
 
-    fetchInitialArticles();
-  }, [selectedCategory, searchQuery]);
+    fetchArticles();
+  }, [selectedCategory, searchQuery, isInitialLoad]);
 
   const loadMorePosts = async () => {
     try {
@@ -212,47 +222,55 @@ function HomePageContent() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            {articles.map((article, index) => {
-              const readingTime = readingDuration(article.content, {
-                wordsPerMinute: 200,
-                emoji: false,
-              });
-
-              return (
-                <Card key={article.id} className={`${index === 0 ? "mb-8" : "mb-6"} dark:border-white`}>
-                  {index === 0 && article.image && (
-                    <Image src={article.image} height={400} width={800} alt="Featured blog post" className="w-full h-64 object-cover" />
-                  )}
-                  <CardHeader>
-                    <CardTitle className={index === 0 ? "text-2xl" : "text-xl"}>{article.title}</CardTitle>
-                    <CardDescription>{stripMarkdown(article.content).substring(0, 100)}...</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                      <span className="flex items-center"><User size={16} className="mr-1" /> Author</span>
-                      <span className="flex items-center"><Calendar size={16} className="mr-1" /> {new Date(article.created_at).toLocaleDateString()}</span>
-                      <span className="flex items-center"><Clock size={16} className="mr-1" /> {readingTime}</span>
-                      <span className="flex items-center"><Search size={16} className="mr-1" /> {article.views} views</span>
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Link href={`/article/${article.id}`}>
-                      <Button variant={index === 0 ? "default" : "outline"}>Read More</Button>
-                    </Link>
-                  </CardFooter>
-                </Card>
-              );
-            })}
-            {hasMore && (
-              <div className="mt-8 flex justify-center">
-                <Button 
-                  variant="outline" 
-                  onClick={loadMorePosts}
-                  disabled={loadingMore}
-                >
-                  {loadingMore ? 'Loading...' : 'Load More Posts'}
-                </Button>
+            {(articlesLoading || searchLoading) ? (
+              <div className="flex items-center justify-center py-20">
+                <Loading />
               </div>
+            ) : (
+              <>
+                {articles.map((article, index) => {
+                  const readingTime = readingDuration(article.content, {
+                    wordsPerMinute: 200,
+                    emoji: false,
+                  });
+
+                  return (
+                    <Card key={article.id} className={`${index === 0 ? "mb-8" : "mb-6"} dark:border-white`}>
+                      {index === 0 && article.image && (
+                        <Image src={article.image} height={400} width={800} alt="Featured blog post" className="w-full h-64 object-cover" />
+                      )}
+                      <CardHeader>
+                        <CardTitle className={index === 0 ? "text-2xl" : "text-xl"}>{article.title}</CardTitle>
+                        <CardDescription>{stripMarkdown(article.content).substring(0, 100)}...</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                          <span className="flex items-center"><User size={16} className="mr-1" /> Author</span>
+                          <span className="flex items-center"><Calendar size={16} className="mr-1" /> {new Date(article.created_at).toLocaleDateString()}</span>
+                          <span className="flex items-center"><Clock size={16} className="mr-1" /> {readingTime}</span>
+                          <span className="flex items-center"><Search size={16} className="mr-1" /> {article.views} views</span>
+                        </div>
+                      </CardContent>
+                      <CardFooter>
+                        <Link href={`/article/${article.id}`}>
+                          <Button variant={index === 0 ? "default" : "outline"}>Read More</Button>
+                        </Link>
+                      </CardFooter>
+                    </Card>
+                  );
+                })}
+                {hasMore && !searchQuery && (
+                  <div className="mt-8 flex justify-center">
+                    <Button
+                      variant="outline"
+                      onClick={loadMorePosts}
+                      disabled={loadingMore}
+                    >
+                      {loadingMore ? 'Loading...' : 'Load More Posts'}
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
