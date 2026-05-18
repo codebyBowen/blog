@@ -23,6 +23,7 @@
     "@tailwindcss/typography": "^0.5.15",
     "@types/react-syntax-highlighter": "^15.5.13",
     "@types/uuid": "^10.0.0",
+    "@upstash/redis": "^1.38.0",
     "bun": "^1.1.27",
     "caniuse-lite": "^1.0.30001669",
     "class-variance-authority": "^0.7.0",

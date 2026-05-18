@@ -20,7 +20,6 @@ import {
 import { CopyBlock, dracula } from "react-code-blocks";
 // import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 // import NextImage from 'next/image';
@@ -51,71 +50,51 @@ export default function ArticleContent({
   const [thumbsUp, setThumbsUp] = useState(article.thumbs_up || 0);
   const [thumbsDown, setThumbsDown] = useState(article.thumbs_down || 0);
   const [userVote, setUserVote] = useState<"up" | "down" | null>(null);
+  const [isVoting, setIsVoting] = useState(false);
 
   useEffect(() => {
-    // 从 localStorage 加载用户投票状态
-    const savedVote = localStorage.getItem(`vote-${article.id}`);
-    if (savedVote) {
-      setUserVote(savedVote as "up" | "down");
-    }
+    let cancelled = false;
+
+    fetch(`/api/articles/${article.id}/counters`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled || !data) return;
+        setThumbsUp(data.likes ?? 0);
+        setThumbsDown(data.dislikes ?? 0);
+      })
+      .catch(() => {});
+
+    fetch(`/api/articles/${article.id}/vote`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (cancelled || !data) return;
+        setUserVote(data.userVote ?? null);
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
   }, [article.id]);
 
   const handleVote = async (voteType: "up" | "down") => {
-    console.log("Vote clicked:", voteType);
-
-    const isRemovingVote = userVote === voteType;
-    const column = voteType === "up" ? "thumbup" : "thumbdown";
-
+    if (isVoting) return;
+    setIsVoting(true);
     try {
-      const supabase = createClientComponentClient();
-
-      // 更新投票状态
-      setUserVote(isRemovingVote ? null : voteType);
-
-      // 更新 localStorage
-      if (isRemovingVote) {
-        localStorage.removeItem(`vote-${article.id}`);
-      } else {
-        localStorage.setItem(`vote-${article.id}`, voteType);
-      }
-
-      // 更新数据库
-      const { data: currentArticle, error: fetchError } = await supabase
-        .from("articles")
-        .select("thumbup, thumbdown")
-        .eq("id", article.id)
-        .single();
-
-      if (fetchError) {
-        console.error("Error fetching article:", fetchError);
-        return;
-      }
-
-      const currentValue = (currentArticle as any)[column] || 0;
-      const newValue = Math.max(
-        0,
-        isRemovingVote ? currentValue - 1 : currentValue + 1
-      );
-
-      const { data: updatedArticle, error } = await supabase
-        .from("articles")
-        .update({ [column]: newValue })
-        .eq("id", article.id)
-        .select("thumbup, thumbdown")
-        .single();
-
-      if (error) {
-        console.error("Error updating vote:", error);
-        return;
-      }
-
-      // 使用数据库返回的最新数据更新状态
-      if (updatedArticle) {
-        setThumbsUp(updatedArticle.thumbup || 0);
-        setThumbsDown(updatedArticle.thumbdown || 0);
-      }
+      const res = await fetch(`/api/articles/${article.id}/vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ vote: voteType }),
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      setThumbsUp(data.likes ?? 0);
+      setThumbsDown(data.dislikes ?? 0);
+      setUserVote(data.userVote ?? null);
     } catch (error) {
       console.error("Error in vote handling:", error);
+    } finally {
+      setIsVoting(false);
     }
   };
 
