@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Components } from "react-markdown";
 import Image from "@/components/Image";
+import D3Figure from "@/components/d3/D3Figure";
 import readingDuration from "reading-duration";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -120,9 +121,33 @@ export default function ArticleContent({
   };
 
   const customRenderers: Partial<Components> = {
+    pre({ node, children }) {
+      const child = (node as any)?.children?.[0];
+      const cls: string = child?.properties?.className?.[0] || "";
+      // Unwrap our interactive viz blocks so the <figure> isn't nested in <pre>.
+      if (cls === "language-viz") return <>{children}</>;
+      return <pre>{children}</pre>;
+    },
     code({ inline, className, children, ...props }) {
       const match = /language-(\w+)/.exec(className || "");
       const language = match ? match[1] : "";
+
+      // Interactive D3 figure: ```viz  { "chart": "ytd-returns" }  ```
+      if (!inline && language === "viz") {
+        let cfg: { chart?: string; [k: string]: unknown } = {};
+        try {
+          cfg = JSON.parse(String(children).trim());
+        } catch {
+          return (
+            <div className="not-prose my-6 rounded-lg border border-dashed border-amber-300 p-4 text-sm text-amber-600">
+              Invalid <code>viz</code> config — expected JSON like{" "}
+              <code>{`{ "chart": "ytd-returns" }`}</code>.
+            </div>
+          );
+        }
+        const { chart, ...options } = cfg;
+        return <D3Figure chartId={String(chart)} options={options} />;
+      }
 
       if (!inline && match) {
         return (
