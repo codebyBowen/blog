@@ -145,8 +145,22 @@ export default function ArticleContent({
             </div>
           );
         }
-        const { chart, ...options } = cfg;
-        return <D3Figure chartId={String(chart)} options={options} />;
+        const { chart, title, caption, source, ...options } = cfg as {
+          chart?: string;
+          title?: string;
+          caption?: string;
+          source?: string;
+          [k: string]: unknown;
+        };
+        return (
+          <D3Figure
+            chartId={String(chart)}
+            title={title}
+            caption={caption}
+            source={source}
+            options={options}
+          />
+        );
       }
 
       if (!inline && match) {

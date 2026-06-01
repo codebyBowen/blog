@@ -1,33 +1,63 @@
 "use client";
 
-import { useMemo } from "react";
-import { scaleBand, scaleRadial } from "d3-scale";
+import { useId, useMemo } from "react";
+import { scaleBand, scaleRadial, scaleLinear } from "d3-scale";
 import { max } from "d3-array";
 import { arc as d3arc } from "d3-shape";
-import { YTD_RETURNS, COMPANY_COLOR } from "../data/storage2026";
 import { ChartProps } from "../lib/types";
 import { useAnimatedProgress } from "../lib/hooks";
-import { pct } from "../lib/format";
+import { gradient, colorAt } from "../lib/palette";
 
-export default function RadialReturns({ width, active }: ChartProps) {
-  const size = Math.max(280, Math.min(width, 560));
-  const innerR = size * 0.15;
-  const outerR = size * 0.40;
+interface Datum {
+  label: string;
+  value: number;
+  color?: string;
+}
+interface Options {
+  data?: Datum[];
+  unit?: string;
+  valuePrefix?: string;
+  center?: { title?: string; subtitle?: string };
+  max?: number;
+  sort?: boolean;
+}
+
+export default function RadialBars({ width, active, options = {} }: ChartProps) {
+  const o = options as Options;
+  const unit = o.unit ?? "";
+  const prefix = o.valuePrefix ?? "";
+  const raw = Array.isArray(o.data) ? o.data : [];
+  const uid = useId().replace(/:/g, "");
   const p = useAnimatedProgress(active, 1400);
 
   const data = useMemo(
-    () => [...YTD_RETURNS].sort((a, b) => b.ytd - a.ytd),
-    []
+    () => (o.sort === false ? raw : [...raw].sort((a, b) => b.value - a.value)),
+    [raw, o.sort]
   );
-  const maxV = max(data, (d) => d.ytd)!;
+
+  if (!data.length) {
+    return (
+      <div className="flex h-48 items-center justify-center text-sm text-slate-400">
+        No <code className="mx-1">data</code> in the viz block.
+      </div>
+    );
+  }
+
+  const size = Math.max(280, Math.min(width, 560));
+  const innerR = size * 0.15;
+  const outerR = size * 0.4;
+  const maxV = o.max ?? max(data, (d) => d.value)!;
 
   const x = scaleBand<string>()
-    .domain(data.map((d) => d.ticker))
+    .domain(data.map((_, i) => String(i)))
     .range([0, 2 * Math.PI])
     .padding(0.32);
   const y = scaleRadial().domain([0, maxV]).range([innerR, outerR]);
   const arcGen = d3arc();
-  const rings = [100, 200, 300, 400, 500].filter((v) => v <= maxV);
+  const rings = scaleLinear()
+    .domain([0, maxV])
+    .ticks(5)
+    .filter((v) => v > 0 && v <= maxV);
 
   return (
     <svg
@@ -35,15 +65,15 @@ export default function RadialReturns({ width, active }: ChartProps) {
       width="100%"
       style={{ maxWidth: size, margin: "0 auto", display: "block" }}
       role="img"
-      aria-label="2026 year-to-date share-price returns, radial bar chart"
+      aria-label="radial bar chart"
     >
       <defs>
-        {data.map((d) => {
-          const [c0, c1] = COMPANY_COLOR[d.name] ?? ["#64748b", "#94a3b8"];
+        {data.map((d, i) => {
+          const [c0, c1] = gradient(colorAt(i, d.color));
           return (
             <linearGradient
-              key={d.ticker}
-              id={`grad-${d.ticker}`}
+              key={i}
+              id={`rb-${uid}-${i}`}
               x1="0"
               y1="0"
               x2="1"
@@ -54,7 +84,7 @@ export default function RadialReturns({ width, active }: ChartProps) {
             </linearGradient>
           );
         })}
-        <filter id="rr-glow" x="-50%" y="-50%" width="200%" height="200%">
+        <filter id={`rb-glow-${uid}`} x="-50%" y="-50%" width="200%" height="200%">
           <feGaussianBlur stdDeviation="3" result="b" />
           <feMerge>
             <feMergeNode in="b" />
@@ -82,14 +112,15 @@ export default function RadialReturns({ width, active }: ChartProps) {
             className="fill-slate-400 dark:fill-slate-500"
             fontSize={9}
           >
-            {r}%
+            {r}
+            {unit}
           </text>
         ))}
 
-        {data.map((d) => {
-          const a0 = x(d.ticker)!;
+        {data.map((d, i) => {
+          const a0 = x(String(i))!;
           const a1 = a0 + x.bandwidth();
-          const rOuter = innerR + (y(d.ytd) - innerR) * p;
+          const rOuter = innerR + (y(d.value) - innerR) * p;
           const dPath = arcGen({
             startAngle: a0,
             endAngle: a1,
@@ -103,11 +134,11 @@ export default function RadialReturns({ width, active }: ChartProps) {
           const ly = -Math.cos(mid) * lr;
           const anchor = Math.sin(mid) >= -0.05 ? "start" : "end";
           return (
-            <g key={d.ticker}>
+            <g key={i}>
               <path
                 d={dPath}
-                fill={`url(#grad-${d.ticker})`}
-                filter="url(#rr-glow)"
+                fill={`url(#rb-${uid}-${i})`}
+                filter={`url(#rb-glow-${uid})`}
               />
               <text
                 x={lx}
@@ -118,32 +149,38 @@ export default function RadialReturns({ width, active }: ChartProps) {
                 fontSize={Math.max(10, size * 0.022)}
                 fontWeight={600}
               >
-                {d.name}{" "}
+                {d.label}{" "}
                 <tspan className="fill-slate-400 dark:fill-slate-500">
-                  {pct(Math.round(d.ytd * p))}
+                  {prefix}
+                  {Math.round(d.value * p)}
+                  {unit}
                 </tspan>
               </text>
             </g>
           );
         })}
 
-        <text
-          textAnchor="middle"
-          className="fill-slate-900 dark:fill-white"
-          fontSize={Math.max(11, size * 0.026)}
-          fontWeight={700}
-          dy={-3}
-        >
-          YTD 2026
-        </text>
-        <text
-          textAnchor="middle"
-          className="fill-slate-400"
-          fontSize={Math.max(8, size * 0.018)}
-          dy={Math.max(10, size * 0.03)}
-        >
-          share price
-        </text>
+        {o.center?.title && (
+          <text
+            textAnchor="middle"
+            className="fill-slate-900 dark:fill-white"
+            fontSize={Math.max(11, size * 0.026)}
+            fontWeight={700}
+            dy={-3}
+          >
+            {o.center.title}
+          </text>
+        )}
+        {o.center?.subtitle && (
+          <text
+            textAnchor="middle"
+            className="fill-slate-400"
+            fontSize={Math.max(8, size * 0.018)}
+            dy={Math.max(10, size * 0.03)}
+          >
+            {o.center.subtitle}
+          </text>
+        )}
       </g>
     </svg>
   );

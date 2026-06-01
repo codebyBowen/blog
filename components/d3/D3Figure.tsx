@@ -5,9 +5,15 @@ import { CHARTS } from "./registry";
 
 export default function D3Figure({
   chartId,
+  title,
+  caption,
+  source,
   options,
 }: {
   chartId: string;
+  title?: string;
+  caption?: string;
+  source?: string;
   options?: Record<string, unknown>;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -41,23 +47,27 @@ export default function D3Figure({
   if (!entry) {
     return (
       <div className="not-prose my-6 rounded-lg border border-dashed border-red-300 p-4 text-sm text-red-500">
-        Unknown chart: <code>{String(chartId)}</code>
+        Unknown chart: <code>{String(chartId)}</code>. Available:{" "}
+        {Object.keys(CHARTS).join(", ")}.
       </div>
     );
   }
 
-  const { Component, title, caption, source } = entry;
+  const { Component } = entry;
+  const finalTitle = title ?? entry.title;
+  const finalCaption = caption ?? entry.caption;
+  const finalSource = source ?? entry.source;
 
   return (
     <figure className="not-prose my-10 overflow-hidden rounded-2xl border border-black/[0.06] bg-gradient-to-b from-white to-slate-50/80 p-5 shadow-sm dark:border-white/10 dark:from-slate-900 dark:to-slate-950">
-      {title && (
+      {finalTitle && (
         <figcaption className="text-base font-semibold text-slate-900 dark:text-white">
-          {title}
+          {finalTitle}
         </figcaption>
       )}
-      {caption && (
+      {finalCaption && (
         <p className="mt-0.5 mb-4 text-sm text-slate-500 dark:text-slate-400">
-          {caption}
+          {finalCaption}
         </p>
       )}
       <div ref={ref} className="w-full">
@@ -65,9 +75,9 @@ export default function D3Figure({
           <Component width={width} active={active} options={options} />
         )}
       </div>
-      {source && (
+      {finalSource && (
         <p className="mt-3 text-[11px] leading-snug text-slate-400 dark:text-slate-500">
-          {source}
+          {finalSource}
         </p>
       )}
     </figure>
